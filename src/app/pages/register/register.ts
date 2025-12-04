@@ -50,6 +50,28 @@ export class Register {
         if (this.registerForm.valid) {
             this.loading = true;
             const { name, email, password } = this.registerForm.value;
+
+            try {
+                // 1. Sign up the user
+                const { data: authData, error: authError } = await this.supabaseService.signUp(email, password, {
+                    full_name: name,
+                    role: 'client'
+                });
+
+                if (authError) throw authError;
+
+                // 2. Create profile entry (Supabase RLS should handle this, but we ensure the profile data is passed)
+                // Note: Supabase signUp options.data automatically populates the user metadata.
+                // We rely on a Supabase trigger to create the 'profiles' entry upon new user creation.
+
+                this.snackBar.open('Cadastro realizado! Verifique seu email para confirmar a conta.', 'Fechar', { duration: 5000 });
+                this.router.navigate(['/login']);
+
+            } catch (error: any) {
+                this.snackBar.open(error.message || 'Erro ao cadastrar cliente.', 'Fechar', { duration: 3000 });
+            } finally {
+                this.loading = false;
+            }
         }
     }
 }

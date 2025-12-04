@@ -50,6 +50,24 @@ export class RegisterExpert {
     if (this.registerForm.valid) {
       this.loading = true;
       const { name, email, password } = this.registerForm.value;
+
+      try {
+        // 1. Sign up the user
+        const { data: authData, error: authError } = await this.supabaseService.signUp(email, password, {
+          full_name: name,
+          role: 'expert'
+        });
+
+        if (authError) throw authError;
+
+        this.snackBar.open('Cadastro de Perito realizado! Verifique seu email para confirmar a conta.', 'Fechar', { duration: 5000 });
+        this.router.navigate(['/login']);
+
+      } catch (error: any) {
+        this.snackBar.open(error.message || 'Erro ao cadastrar perito.', 'Fechar', { duration: 3000 });
+      } finally {
+        this.loading = false;
+      }
     }
   }
 }
