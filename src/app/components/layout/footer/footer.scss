@@ -1,0 +1,69 @@
+.app-footer {
+    background-color: #1F2937;
+    color: #F3F4F6;
+    padding: 4rem 0 2rem;
+    margin-top: auto;
+
+    .footer-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        gap: 2rem;
+    }
+
+    .footer-section {
+        margin-bottom: 1.5rem;
+        min-width: 200px;
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #F9FAFB;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #F9FAFB;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #9CA3AF;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+
+            li {
+                margin-bottom: 0.75rem;
+
+                a {
+                    color: #9CA3AF;
+                    text-decoration: none;
+                    transition: color 0.2s;
+
+                    &:hover {
+                        color: #60A5FA;
+                    }
+                }
+            }
+        }
+    }
+
+    .footer-bottom {
+        text-align: center;
+        border-top: 1px solid #374151;
+        padding-top: 2rem;
+        margin-top: 3rem;
+        color: #6B7280;
+        font-size: 0.9rem;
+    }
+}

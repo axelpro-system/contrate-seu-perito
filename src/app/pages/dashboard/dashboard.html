@@ -1,0 +1,72 @@
+<div class="dashboard-container">
+    <h1>Meu Painel</h1>
+
+    <mat-tab-group animationDuration="0ms">
+        <!-- Client View -->
+        <mat-tab label="Minhas Cotações (Cliente)">
+            <div class="tab-content">
+                @if (sentQuotes.length > 0) {
+                <div class="quotes-list">
+                    @for (quote of sentQuotes; track quote.id) {
+                    <mat-card class="quote-card">
+                        <mat-card-header>
+                            <mat-card-title>{{ quote.expertName }}</mat-card-title>
+                            <mat-card-subtitle>{{ quote.date | date:'dd/MM/yyyy' }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>{{ quote.description }}</p>
+                            <mat-chip-set>
+                                <mat-chip [color]="getStatusColor(quote.status)" highlighted>
+                                    {{ getStatusLabel(quote.status) }}
+                                </mat-chip>
+                            </mat-chip-set>
+                        </mat-card-content>
+                        <mat-card-actions align="end">
+                            <button mat-button color="primary">VER DETALHES</button>
+                        </mat-card-actions>
+                    </mat-card>
+                    }
+                </div>
+                } @else {
+                <div class="empty-state">
+                    <mat-icon>inbox</mat-icon>
+                    <p>Nenhuma cotação enviada ainda.</p>
+                </div>
+                }
+            </div>
+        </mat-tab>
+
+        <!-- Expert View -->
+        <mat-tab label="Solicitações Recebidas (Perito)">
+            <div class="tab-content">
+                @if (receivedRequests.length > 0) {
+                <div class="quotes-list">
+                    @for (req of receivedRequests; track req.id) {
+                    <mat-card class="quote-card request-card">
+                        <mat-card-header>
+                            <div mat-card-avatar class="client-avatar">
+                                {{ req.clientName.charAt(0) }}
+                            </div>
+                            <mat-card-title>{{ req.clientName }}</mat-card-title>
+                            <mat-card-subtitle>{{ req.date | date:'dd/MM/yyyy HH:mm' }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>{{ req.description }}</p>
+                        </mat-card-content>
+                        <mat-card-actions align="end">
+                            <button mat-button color="warn">RECUSAR</button>
+                            <button mat-flat-button color="primary">RESPONDER</button>
+                        </mat-card-actions>
+                    </mat-card>
+                    }
+                </div>
+                } @else {
+                <div class="empty-state">
+                    <mat-icon>assignment_turned_in</mat-icon>
+                    <p>Nenhuma solicitação nova.</p>
+                </div>
+                }
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

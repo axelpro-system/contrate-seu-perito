@@ -1,0 +1,71 @@
+<div class="register-wrapper">
+    <div class="branding-section">
+        <div class="branding-content">
+            <h1>Seja um Perito</h1>
+            <p>Junte-se à nossa rede de especialistas e expanda sua carreira.</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Crie sua conta</h2>
+                <p>Preencha os dados abaixo para começar.</p>
+            </div>
+
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Nome Completo</mat-label>
+                    <input matInput formControlName="name" placeholder="Seu nome completo">
+                    @if (registerForm.get('name')?.hasError('required')) {
+                    <mat-error>Nome é obrigatório</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" type="email" placeholder="seu@email.com">
+                    @if (registerForm.get('email')?.hasError('required')) {
+                    <mat-error>Email é obrigatório</mat-error>
+                    }
+                    @if (registerForm.get('email')?.hasError('email')) {
+                    <mat-error>Email inválido</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Senha</mat-label>
+                    <input matInput formControlName="password" type="password" placeholder="••••••••">
+                    @if (registerForm.get('password')?.hasError('required')) {
+                    <mat-error>Senha é obrigatória</mat-error>
+                    }
+                    @if (registerForm.get('password')?.hasError('minlength')) {
+                    <mat-error>Mínimo de 6 caracteres</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Confirmar Senha</mat-label>
+                    <input matInput formControlName="confirmPassword" type="password" placeholder="••••••••">
+                    @if (registerForm.get('confirmPassword')?.hasError('required')) {
+                    <mat-error>Confirmação obrigatória</mat-error>
+                    }
+                    @if (registerForm.hasError('mismatch')) {
+                    <mat-error>As senhas não conferem</mat-error>
+                    }
+                </mat-form-field>
+
+                <div class="actions">
+                    <button mat-flat-button color="primary" type="submit" [disabled]="registerForm.invalid || loading"
+                        class="submit-btn">
+                        {{ loading ? 'Cadastrando...' : 'Cadastrar' }}
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <p>Já tem uma conta? <a routerLink="/login">Faça Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

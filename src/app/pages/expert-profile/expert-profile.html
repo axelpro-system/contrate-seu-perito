@@ -1,0 +1,64 @@
+<div class="profile-container" *ngIf="expert; else loadingOrError">
+    <div class="profile-header">
+        <div class="avatar-section">
+            <div class="avatar" [style.background-image]="'url(' + (expert.avatar_url || 'assets/default-avatar.png') + ')'"></div>
+        </div>
+        <div class="info-section">
+            <h1>{{ expert.full_name }}</h1>
+            <h2 class="specialty">{{ expert.specialty }}</h2>
+            <div class="location">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ expert.city }} - {{ expert.state }}</span>
+            </div>
+            <div class="rate" *ngIf="expert.hourly_rate">
+                <mat-icon>attach_money</mat-icon>
+                <span>R$ {{ expert.hourly_rate }}/h</span>
+            </div>
+            <div class="actions">
+                <button mat-flat-button color="primary">
+                    <mat-icon>chat</mat-icon>
+                    Entrar em Contato
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <mat-card>
+            <mat-card-content>
+                <h3>Sobre</h3>
+                <p class="bio">{{ expert.bio }}</p>
+
+                <mat-divider></mat-divider>
+
+                <div class="details-grid">
+                    <div class="detail-item" *ngIf="expert.phone">
+                        <mat-icon>phone</mat-icon>
+                        <div>
+                            <label>Telefone</label>
+                            <span>{{ expert.phone }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <mat-icon>email</mat-icon>
+                        <div>
+                            <label>Email</label>
+                            <span>{{ expert.email }}</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+<ng-template #loadingOrError>
+    <div class="loading-container">
+        <p *ngIf="loading">Carregando perfil...</p>
+        <div *ngIf="!loading" class="error">
+            <mat-icon>error_outline</mat-icon>
+            <p>Perito não encontrado.</p>
+            <button mat-button color="primary" routerLink="/search">Voltar para busca</button>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,46 @@
+<mat-card class="expert-card">
+    <div class="card-header-bg"></div>
+
+    <div class="card-content-wrapper">
+        <div class="avatar-section">
+            <div class="avatar-placeholder">
+                {{ expert.name.charAt(0) }}
+            </div>
+        </div>
+
+        <div class="info-section">
+            <mat-card-title>{{ expert.name }}</mat-card-title>
+            <mat-card-subtitle>{{ expert.title }}</mat-card-subtitle>
+
+            <div class="rating">
+                <mat-icon class="star">star</mat-icon>
+                <span>{{ expert.rating }}</span>
+                <span class="reviews">({{ expert.reviewsCount }})</span>
+            </div>
+
+            <div class="location">
+                <mat-icon>location_on</mat-icon>
+                {{ expert.location }}
+            </div>
+
+            <mat-chip-set class="specialties">
+                @for (specialty of expert.specialties.slice(0, 2); track specialty) {
+                <mat-chip>{{ specialty }}</mat-chip>
+                }
+                @if (expert.specialties.length > 2) {
+                <mat-chip>+{{ expert.specialties.length - 2 }}</mat-chip>
+                }
+            </mat-chip-set>
+        </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-actions>
+        <div class="price">
+            <span class="label">A partir de</span>
+            <span class="value">{{ expert.hourlyRate }}</span>
+        </div>
+        <a mat-flat-button color="primary" [routerLink]="['/expert', expert.id]">Ver Perfil</a>
+    </mat-card-actions>
+</mat-card>

@@ -1,0 +1,110 @@
+.dashboard-container {
+    padding: 3rem 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+
+    h1 {
+        margin-bottom: 2.5rem;
+        color: #102A43;
+        font-size: 2.5rem;
+        letter-spacing: -0.02em;
+    }
+}
+
+.tab-content {
+    padding: 2.5rem 0;
+}
+
+.quotes-list {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+.quote-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    background: white;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    mat-card-header {
+        margin-bottom: 1rem;
+
+        mat-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #102A43;
+        }
+
+        mat-card-subtitle {
+            font-size: 0.9rem;
+            color: #829AB1;
+            margin-top: 0.25rem;
+        }
+    }
+
+    mat-card-content {
+        flex: 1;
+        margin-top: 0.5rem;
+
+        p {
+            color: #486581;
+            margin-bottom: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+    }
+
+    mat-card-actions {
+        padding: 1rem;
+        border-top: 1px solid #F0F4F8;
+
+        button {
+            font-weight: 600;
+        }
+    }
+}
+
+.client-avatar {
+    background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 6rem 0;
+    color: #829AB1;
+    background: white;
+    border-radius: 16px;
+    border: 2px dashed #D9E2EC;
+
+    mat-icon {
+        font-size: 64px;
+        height: 64px;
+        width: 64px;
+        margin-bottom: 1.5rem;
+        color: #BCCCDC;
+    }
+
+    p {
+        font-size: 1.1rem;
+    }
+}

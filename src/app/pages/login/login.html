@@ -1,0 +1,57 @@
+<div class="login-wrapper">
+    <div class="branding-section">
+        <div class="branding-content">
+            <h1>Contrate seu Perito</h1>
+            <p>A plataforma mais completa para encontrar especialistas.</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Bem-vindo de volta</h2>
+                <p>Por favor, insira seus dados para entrar.</p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" type="email" placeholder="exemplo@email.com">
+                    @if (loginForm.get('email')?.hasError('required')) {
+                    <mat-error>Email é obrigatório</mat-error>
+                    }
+                    @if (loginForm.get('email')?.hasError('email')) {
+                    <mat-error>Email inválido</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width custom-field">
+                    <mat-label>Senha</mat-label>
+                    <input matInput formControlName="password" type="password" placeholder="••••••••">
+                    @if (loginForm.get('password')?.hasError('required')) {
+                    <mat-error>Senha é obrigatória</mat-error>
+                    }
+                    @if (loginForm.get('password')?.hasError('minlength')) {
+                    <mat-error>Mínimo de 6 caracteres</mat-error>
+                    }
+                </mat-form-field>
+
+                <div class="actions">
+                    <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || loading"
+                        class="submit-btn">
+                        {{ loading ? 'Entrando...' : 'Entrar' }}
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <p>Não tem uma conta?</p>
+                    <div class="register-links">
+                        <a routerLink="/register">Cliente</a>
+                        <span>ou</span>
+                        <a routerLink="/register-expert">Perito</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

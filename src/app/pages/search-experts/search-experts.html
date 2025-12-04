@@ -1,0 +1,62 @@
+<div class="search-container">
+    <div class="search-header">
+        <h1>Encontre um Perito</h1>
+        <p>Busque por nome, especialidade ou cidade</p>
+    </div>
+
+    <form [formGroup]="searchForm" (ngSubmit)="searchExperts()" class="search-form">
+        <mat-form-field appearance="outline">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="name" placeholder="Nome do perito">
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Especialidade</mat-label>
+            <input matInput formControlName="specialty" placeholder="Ex: Engenharia">
+            <mat-icon matSuffix>work</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Cidade</mat-label>
+            <input matInput formControlName="city" placeholder="Cidade">
+            <mat-icon matSuffix>location_on</mat-icon>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="loading">
+            {{ loading ? 'Buscando...' : 'Buscar' }}
+        </button>
+    </form>
+
+    <div class="results-grid">
+        @for (expert of experts; track expert.id) {
+        <mat-card class="expert-card">
+            <mat-card-header>
+                <div mat-card-avatar class="expert-avatar"
+                    [style.background-image]="'url(' + (expert.avatar_url || 'assets/default-avatar.png') + ')'"></div>
+                <mat-card-title>{{ expert.full_name }}</mat-card-title>
+                <mat-card-subtitle>{{ expert.specialty }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <p class="bio">{{ expert.bio | slice:0:100 }}{{ expert.bio?.length > 100 ? '...' : '' }}</p>
+                <div class="info-row">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ expert.city }} - {{ expert.state }}</span>
+                </div>
+                <div class="info-row" *ngIf="expert.hourly_rate">
+                    <mat-icon>attach_money</mat-icon>
+                    <span>R$ {{ expert.hourly_rate }}/h</span>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <button mat-stroked-button color="primary" [routerLink]="['/expert', expert.id]">Ver Perfil</button>
+            </mat-card-actions>
+        </mat-card>
+        } @empty {
+        <div class="no-results" *ngIf="!loading">
+            <mat-icon>sentiment_dissatisfied</mat-icon>
+            <p>Nenhum perito encontrado com esses critérios.</p>
+        </div>
+        }
+    </div>
+</div>

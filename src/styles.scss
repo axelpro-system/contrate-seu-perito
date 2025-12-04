@@ -1,0 +1,185 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Custom Palette Generation (Simplified for MVP)
+// Primary: #007AFF (Deep Blue)
+$custom-primary: (
+    50: #e0efff,
+    100: #b3d7ff,
+    200: #80bfff,
+    300: #4da6ff,
+    400: #2693ff,
+    500: #007aff,
+    // Main
+    600: #0072ff,
+    700: #0067ff,
+    800: #005dff,
+    900: #004aff,
+    A100: #ffffff,
+    A200: #e0efff,
+    A400: #80bfff,
+    A700: #0067ff,
+    contrast: (50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #ffffff,
+    )
+);
+
+// Accent: #3CB371 (Medium Sea Green)
+$custom-accent: (
+    50: #e8f6ed,
+    100: #c5e9d1,
+    200: #9fdbb3,
+    300: #79cd95,
+    400: #5cc27e,
+    500: #3cb371,
+    // Main
+    600: #36ac69,
+    700: #2ea35e,
+    800: #279a54,
+    900: #1a8b42,
+    A100: #d4ffde,
+    A200: #a1ffb6,
+    A400: #6eff8e,
+    A700: #54ff7a,
+    contrast: (50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    )
+);
+
+// Warn: #DC3545 (Danger Red)
+$custom-warn: (
+    50: #fbeaea,
+    100: #f5cbcb,
+    200: #eeaaaa,
+    300: #e78888,
+    400: #e26f6f,
+    500: #dc3545,
+    // Main
+    600: #d8303e,
+    700: #d32836,
+    800: #ce222e,
+    900: #c5161f,
+    A100: #ffecec,
+    A200: #ffb9b9,
+    A400: #ff8686,
+    A700: #ff6d6d,
+    contrast: (50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #000000,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    )
+);
+
+// Use m2- prefixed mixins for Angular Material 17+
+$my-primary: mat.m2-define-palette($custom-primary);
+$my-accent: mat.m2-define-palette($custom-accent);
+$my-warn: mat.m2-define-palette($custom-warn);
+
+$my-theme: mat.m2-define-light-theme((color: (primary: $my-primary,
+                accent: $my-accent,
+                warn: $my-warn,
+            )));
+
+@include mat.all-component-themes($my-theme);
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #F8F9FA; // Lighter, cleaner gray
+    color: #1F2937; // Softer black for text
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// Typography Overrides
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+// Global Variables for Premium UI
+:root {
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+    --transition-base: all 0.2s ease-in-out;
+}
+
+// Utility classes for colors
+.text-primary {
+    color: mat.m2-get-color-from-palette($my-primary, 500);
+}
+
+.text-accent {
+    color: mat.m2-get-color-from-palette($my-accent, 500);
+}
+
+.text-warn {
+    color: mat.m2-get-color-from-palette($my-warn, 500);
+}
+
+.text-success {
+    color: #28A745;
+}
+
+.bg-primary {
+    background-color: mat.m2-get-color-from-palette($my-primary, 500);
+    color: white;
+}
+
+.bg-accent {
+    background-color: mat.m2-get-color-from-palette($my-accent, 500);
+    color: white;
+}
+
+.bg-white {
+    background-color: #ffffff;
+}

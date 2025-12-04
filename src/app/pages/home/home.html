@@ -1,0 +1,78 @@
+<div class="home-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Encontre o Perito Ideal para o seu Caso</h1>
+            <p>Conectamos você aos melhores especialistas certificados pelo IBCAPPA.</p>
+
+            <div class="search-card">
+                <div class="search-fields">
+                    <mat-form-field appearance="outline" class="search-input">
+                        <mat-label>O que você precisa?</mat-label>
+                        <input matInput placeholder="Ex: Perícia Médica" [(ngModel)]="searchTerm">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filter-select">
+                        <mat-label>Especialidade</mat-label>
+                        <mat-select [(ngModel)]="selectedSpecialty">
+                            <mat-option [value]="''">Todas</mat-option>
+                            @for (specialty of specialties; track specialty) {
+                            <mat-option [value]="specialty">{{specialty}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="filter-select">
+                        <mat-label>Localização</mat-label>
+                        <mat-select [(ngModel)]="selectedLocation">
+                            <mat-option [value]="''">Todas</mat-option>
+                            @for (location of locations; track location) {
+                            <mat-option [value]="location">{{location}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <button mat-flat-button color="primary" class="search-button" (click)="onSearch()">
+                    Buscar Peritos
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Experts Section -->
+    <section class="featured-section">
+        <div class="section-header">
+            <h2>Peritos em Destaque</h2>
+            <p>Profissionais mais bem avaliados da semana</p>
+        </div>
+
+        <div class="experts-grid">
+            @for (expert of featuredExperts; track expert.id) {
+            <app-expert-card [expert]="expert"></app-expert-card>
+            }
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2>Por que usar nossa plataforma?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <mat-icon class="feature-icon">verified_user</mat-icon>
+                <h3>Peritos Verificados</h3>
+                <p>Todos os profissionais são certificados e validados pelo IBCAPPA.</p>
+            </div>
+            <div class="feature-card">
+                <mat-icon class="feature-icon">speed</mat-icon>
+                <h3>Rápido e Fácil</h3>
+                <p>Encontre especialistas e solicite cotações em poucos cliques.</p>
+            </div>
+            <div class="feature-card">
+                <mat-icon class="feature-icon">security</mat-icon>
+                <h3>Segurança</h3>
+                <p>Negocie com confiança e transparência.</p>
+            </div>
+        </div>
+    </section>
+</div>

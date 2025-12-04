@@ -1,0 +1,134 @@
+.login-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #fff;
+
+    .branding-section {
+        display: none; // Hidden on mobile
+        width: 50%;
+        background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+        color: white;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+
+        @media (min-width: 768px) {
+            display: flex;
+        }
+
+        .branding-content {
+            max-width: 400px;
+            text-align: center;
+
+            h1 {
+                font-size: 3rem;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                line-height: 1.2;
+            }
+
+            p {
+                font-size: 1.2rem;
+                opacity: 0.9;
+            }
+        }
+    }
+
+    .form-section {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background-color: #ffffff;
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+
+            // Optional: Add a subtle shadow or border for better definition on large screens if desired
+            // box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            // border-radius: 12px;
+
+            .form-header {
+                margin-bottom: 32px;
+                text-align: center;
+
+                h2 {
+                    font-size: 2rem;
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 8px;
+                }
+
+                p {
+                    color: #666;
+                    font-size: 1rem;
+                }
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+
+                .custom-field {
+                    // Custom field styles if needed
+                }
+
+                .actions {
+                    margin-top: 8px;
+
+                    .submit-btn {
+                        width: 100%;
+                        height: 48px;
+                        font-size: 1rem;
+                        border-radius: 8px;
+                        background-color: #1a237e; // Primary color
+                        color: white;
+
+                        &:disabled {
+                            background-color: #e0e0e0;
+                        }
+                    }
+                }
+
+                .form-footer {
+                    margin-top: 24px;
+                    text-align: center;
+
+                    p {
+                        color: #666;
+                        margin-bottom: 8px;
+                    }
+
+                    .register-links {
+                        display: flex;
+                        justify-content: center;
+                        gap: 8px;
+                        align-items: center;
+                        font-size: 0.95rem;
+
+                        a {
+                            color: #1a237e;
+                            font-weight: 600;
+                            text-decoration: none;
+                            transition: color 0.2s;
+
+                            &:hover {
+                                color: #0d47a1;
+                                text-decoration: underline;
+                            }
+                        }
+
+                        span {
+                            color: #999;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

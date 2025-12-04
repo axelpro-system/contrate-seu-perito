@@ -1,0 +1,57 @@
+.edit-profile-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 64px); // Adjust based on navbar height
+}
+
+mat-card {
+    width: 100%;
+    max-width: 800px;
+    padding: 32px;
+}
+
+mat-card-header {
+    margin-bottom: 32px;
+
+    mat-card-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    mat-card-subtitle {
+        font-size: 14px;
+        color: #666;
+    }
+}
+
+.form-row {
+    margin-bottom: 16px;
+
+    &.two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+
+        @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+.full-width {
+    width: 100%;
+}
+
+.actions {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+        min-width: 150px;
+        padding: 8px 24px;
+    }
+}

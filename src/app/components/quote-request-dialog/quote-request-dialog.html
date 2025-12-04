@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Solicitar Cotação para {{ data.expertName }}</h2>
+<mat-dialog-content>
+    <p>Descreva brevemente o seu caso para que o perito possa analisar.</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição do Caso</mat-label>
+        <textarea matInput [(ngModel)]="description" rows="5"
+            placeholder="Ex: Preciso de uma perícia médica para um processo trabalhista..."></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Seu Email de Contato</mat-label>
+        <input matInput [(ngModel)]="contactEmail" placeholder="email@exemplo.com">
+    </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!description || !contactEmail">Enviar
+        Solicitação</button>
+</mat-dialog-actions>

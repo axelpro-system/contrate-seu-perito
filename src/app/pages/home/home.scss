@@ -1,0 +1,190 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-section {
+    background: linear-gradient(rgba(12, 118, 180, 0.397), rgba(0, 0, 0, 0.041)), url('/assets/images/home-banner-02.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 8rem 1rem;
+    text-align: center;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    .hero-content {
+        max-width: 1000px;
+        width: 100%;
+        z-index: 1;
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 4rem;
+            opacity: 0.95;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+    }
+}
+
+.search-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+
+    .search-fields {
+        display: flex;
+        gap: 1rem;
+        width: 100%;
+
+        mat-form-field {
+            flex: 1;
+
+            &.search-input {
+                flex: 2;
+            }
+        }
+    }
+
+    .search-button {
+        height: 48px;
+        padding: 0 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        align-self: flex-start;
+        min-width: 160px;
+    }
+}
+
+.featured-section {
+    padding: 6rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+
+        h2 {
+            font-size: 2.5rem;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        p {
+            color: #4B5563;
+            font-size: 1.1rem;
+        }
+    }
+
+    .experts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+}
+
+.features-section {
+    padding: 6rem 1rem;
+    background-color: #F9FAFB;
+    text-align: center;
+
+    h2 {
+        font-size: 2.5rem;
+        margin-bottom: 4rem;
+        color: #111827;
+        font-weight: 800;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 3rem 2rem;
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #F3F4F6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            height: 48px;
+            width: 48px;
+            color: #007AFF;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #111827;
+            font-weight: 700;
+        }
+
+        p {
+            color: #6B7280;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 4rem 1rem;
+
+        h1 {
+            font-size: 2.5rem;
+        }
+    }
+
+    .search-card {
+        padding: 1.5rem;
+
+        .search-fields {
+            flex-direction: column;
+        }
+
+        .search-button {
+            width: 100%;
+        }
+    }
+}
