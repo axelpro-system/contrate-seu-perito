@@ -6,6 +6,12 @@
     <div class="nav-links">
         <a mat-button routerLink="/search">Buscar Peritos</a>
         <a mat-button routerLink="/register-expert" class="cta-expert">Sou Perito</a>
+
+        @if (authService.isAuthenticated()) {
+        <a mat-button [routerLink]="dashboardLink">Painel</a>
+        <button mat-button (click)="onLogout()">Sair</button>
+        } @else {
         <a mat-button routerLink="/login">Entrar</a>
+        }
     </div>
 </mat-toolbar>

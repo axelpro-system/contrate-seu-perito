@@ -10,3 +10,12 @@
     flex-direction: column;
     // padding: 1rem; // Optional: Add global padding or leave to individual pages
 }
+
+.loading-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 1.5rem;
+    color: #007AFF;
+}

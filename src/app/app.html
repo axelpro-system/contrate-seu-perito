@@ -1,9 +1,14 @@
 <div class="app-container">
-  <app-header />
+  @if (!authService.isLoading()) {
+    <app-header />
 
-  <main class="main-content">
-    <router-outlet />
-  </main>
+    <main class="main-content">
+      <router-outlet />
+    </main>
 
-  <app-footer />
+    <app-footer />
+  } @else {
+    <!-- Simple loading state -->
+    <div class="loading-screen">Carregando...</div>
+  }
 </div>
