@@ -39,6 +39,7 @@ export class ExpertProfile implements OnInit {
         const { data, error } = await this.supabaseService.getProfile(id);
         if (error) throw error;
         this.expert = data;
+        console.log('Expert loaded:', this.expert); // Log para debug
       } catch (error) {
         console.error('Error fetching expert:', error);
       } finally {
