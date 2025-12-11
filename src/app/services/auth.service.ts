@@ -14,19 +14,36 @@ export interface UserProfile {
     providedIn: 'root'
 })
 export class AuthService {
-    // Signals to track authentication state and user profile
     public isAuthenticated = signal(false);
     public userProfile = signal<UserProfile | null>(null);
     public isLoading = signal(true);
+
+    private initializationPromise: Promise<void>;
 
     constructor(
         private supabaseService: SupabaseService,
         private router: Router
     ) {
-        this.initializeSession();
+        this.initializationPromise = this.initializeSession();
+
+        // Listen for auth state changes (e.g., login, logout, token refresh)
+        this.supabaseService.client.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                this.isAuthenticated.set(true);
+                this.loadUserProfile(session.user.id);
+            } else if (event === 'SIGNED_OUT') {
+                this.isAuthenticated.set(false);
+                this.userProfile.set(null);
+                this.router.navigate(['/login']);
+            }
+        });
     }
 
-    private async initializeSession() {
+    public get initialized(): Promise<void> {
+        return this.initializationPromise;
+    }
+
+    private async initializeSession(): Promise<void> {
         try {
             const { data: { session } } = await this.supabaseService.getSession();
 
@@ -44,18 +61,6 @@ export class AuthService {
         } finally {
             this.isLoading.set(false);
         }
-
-        // Listen for auth state changes (e.g., login, logout, token refresh)
-        this.supabaseService.client.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-                this.isAuthenticated.set(true);
-                this.loadUserProfile(session.user.id);
-            } else if (event === 'SIGNED_OUT') {
-                this.isAuthenticated.set(false);
-                this.userProfile.set(null);
-                this.router.navigate(['/login']);
-            }
-        });
     }
 
     private async loadUserProfile(userId: string) {
@@ -68,17 +73,15 @@ export class AuthService {
                     id: profile.id,
                     full_name: profile.full_name,
                     role: profile.role,
-                    email: profile.email || '', // Assuming email is available or fetched
+                    email: profile.email || '',
                 });
             }
         } catch (error) {
             console.error('Error loading user profile:', error);
-            // Handle case where profile might not exist yet (e.g., after initial sign up before trigger runs)
         }
     }
 
     async logout() {
         await this.supabaseService.signOut();
-        // The onAuthStateChange listener handles state update and navigation
     }
 }
