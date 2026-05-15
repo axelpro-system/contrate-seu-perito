@@ -108,3 +108,23 @@
         font-size: 1.1rem;
     }
 }
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1.5rem 0.75rem;
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .tab-content {
+        padding: 1.5rem 0;
+    }
+
+    .quotes-list {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}

@@ -1,0 +1,329 @@
+$primary:   #1a237e;
+$primary-dk:#0d1b2a;
+$accent:    #ff6f00;
+$bg:        #f4f5f8;
+$white:     #ffffff;
+$text:      #1c1c2e;
+$sub:       #5a6072;
+$border:    #e3e5ef;
+$radius:    12px;
+
+@keyframes cd-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+.cd-page {
+  background: $bg;
+  min-height: 100vh;
+  padding: 32px 24px 48px;
+  max-width: 860px;
+  margin: 0 auto;
+
+  @media (max-width: 600px) { padding: 20px 16px 40px; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.cd-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+
+  &__inner { flex: 1; }
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: $text;
+    margin: 0 0 4px;
+    letter-spacing: -0.025em;
+
+    @media (max-width: 600px) { font-size: 1.3rem; }
+  }
+
+  &__sub {
+    font-size: 0.9rem;
+    color: $sub;
+    margin: 0;
+  }
+
+  &__btn {
+    background: $primary !important;
+    color: $white !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    white-space: nowrap;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    &:hover { background: $primary-dk !important; }
+  }
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
+.cd-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.cd-card {
+  background: $white;
+  border-radius: $radius;
+  box-shadow: 0 2px 10px rgba(26,35,126,0.07);
+  padding: 20px 24px;
+  border-left: 4px solid transparent;
+  transition: box-shadow 0.2s;
+
+  &:hover { box-shadow: 0 6px 24px rgba(26,35,126,0.12); }
+
+  &--proposal { border-left-color: $primary; }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  &__identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: $primary;
+    color: $white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 2px;
+  }
+
+  &__date {
+    font-size: 0.8rem;
+    color: $sub;
+  }
+
+  &__desc {
+    font-size: 0.9rem;
+    color: $sub;
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+.cd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+  &--pending  { background: #f1f1f1;  color: $sub; }
+  &--review   { background: #e8eaf6;  color: $primary; }
+  &--approved { background: #e8f5e9;  color: #2e7d32; }
+  &--rejected { background: #fce4e4;  color: #c62828; }
+}
+
+// ── Proposal box ──────────────────────────────────────────────────────────────
+.cd-proposal {
+  background: #f8f9ff;
+  border: 1px solid #e3e5ef;
+  border-radius: 10px;
+  padding: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $primary;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  &__label { color: $sub; }
+
+  &__value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: $text;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Card actions ──────────────────────────────────────────────────────────────
+.cd-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cd-btn-chat {
+  color: $primary !important;
+  border-color: $primary !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+}
+
+// ── Action buttons ────────────────────────────────────────────────────────────
+.cd-btn-accept {
+  background: #2e7d32 !important;
+  color: $white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+
+  &:hover { background: #1b5e20 !important; }
+  &[disabled] { opacity: 0.6; }
+}
+
+.cd-btn-reject {
+  border-color: #c62828 !important;
+  color: #c62828 !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+
+  &:hover { background: rgba(198,40,40,0.05) !important; }
+}
+
+.cd-btn-review {
+  background: $accent !important;
+  color: $white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+
+  &:hover { background: #e65100 !important; }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.cd-empty {
+  background: $white;
+  border-radius: $radius;
+  border: 2px dashed $border;
+  text-align: center;
+  padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  &__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #e8eaf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon { font-size: 36px; width: 36px; height: 36px; color: $primary; }
+  }
+
+  h2 { font-size: 1.2rem; font-weight: 700; color: $text; margin: 0; }
+  p  { font-size: 0.9rem; color: $sub; margin: 0; max-width: 300px; }
+
+  &__btn {
+    background: $primary !important;
+    color: $white !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    margin-top: 8px;
+
+    &:hover { background: $primary-dk !important; }
+  }
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+$shimmer-bg: linear-gradient(90deg, #dde0f0 25%, #eaecf7 50%, #dde0f0 75%);
+
+.cd-skeleton {
+  background: $white;
+  border-radius: $radius;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 10px rgba(26,35,126,0.06);
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__badge {
+    width: 80px;
+    height: 24px;
+    border-radius: 999px;
+    background: $shimmer-bg;
+    background-size: 200% 100%;
+    animation: cd-shimmer 1.4s infinite linear;
+    flex-shrink: 0;
+  }
+
+  &__line {
+    height: 13px;
+    border-radius: 6px;
+    background: $shimmer-bg;
+    background-size: 200% 100%;
+    animation: cd-shimmer 1.4s infinite linear;
+
+    &--title { width: 45%; height: 18px; }
+    &--text  { width: 100%; }
+    &--short { width: 60%; }
+  }
+}

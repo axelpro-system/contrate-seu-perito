@@ -39,9 +39,9 @@
         <!-- Expert View -->
         <mat-tab label="Solicitações Recebidas (Perito)">
             <div class="tab-content">
-                @if (receivedRequests.length > 0) {
+                @if (receivedQuotes.length > 0) {
                 <div class="quotes-list">
-                    @for (req of receivedRequests; track req.id) {
+                    @for (req of receivedQuotes; track req.id) {
                     <mat-card class="quote-card request-card">
                         <mat-card-header>
                             <div mat-card-avatar class="client-avatar">

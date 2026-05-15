@@ -1,58 +1,370 @@
-<div class="profile-container" *ngIf="expert; else loadingOrError">
-    <div class="profile-header">
-        <div class="avatar-section">
-            <div class="avatar" [style.background-image]="'url(' + (expert.avatar_url || 'assets/default-avatar.png') + ')'"></div>
+<main class="pp-page">
+
+  @if (isLoading()) {
+  <div class="pp-loading">
+    <div class="pp-skeleton">
+      <div class="pp-skeleton__cover"></div>
+      <div class="pp-skeleton__body">
+        <div class="pp-skeleton__avatar"></div>
+        <div class="pp-skeleton__lines">
+          <div class="pp-skeleton__line pp-skeleton__line--name"></div>
+          <div class="pp-skeleton__line pp-skeleton__line--sub"></div>
+          <div class="pp-skeleton__line pp-skeleton__line--short"></div>
         </div>
-        <div class="info-section">
-            <h1>{{ expert.full_name }}</h1>
-            <h2 class="specialty">{{ expert.specialty }}</h2>
-            <div class="location">
-                <mat-icon>location_on</mat-icon>
-                <span>{{ expert.city }} - {{ expert.state }}</span>
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (!isLoading() && !expert()) {
+  <div class="pp-notfound">
+    <mat-icon aria-hidden="true">person_off</mat-icon>
+    <h2>Perito não encontrado</h2>
+    <p>O perfil que você procura não existe ou foi removido.</p>
+    <button mat-flat-button class="pp-notfound__btn" routerLink="/search">
+      <mat-icon aria-hidden="true">search</mat-icon> Buscar Peritos
+    </button>
+  </div>
+  }
+
+  @if (!isLoading() && expert(); as e) {
+  <div class="pp-content">
+
+    <!-- ═══════════════════════════════════════
+         IDENTITY / HERO
+         ═══════════════════════════════════════ -->
+    <div class="pp-card pp-identity">
+      <div class="pp-identity__cover">
+        <div class="pp-identity__cover-gradient"></div>
+        <div class="pp-identity__cover-pattern"></div>
+      </div>
+
+      <div class="pp-identity__body">
+        <div class="pp-identity__top-row">
+          <div class="pp-identity__avatar-wrap">
+            @if (e.avatar_url) {
+            <img [src]="e.avatar_url" [alt]="'Foto de ' + (e.first_name || '') + ' ' + (e.last_name || '')" width="128" height="128" class="pp-identity__avatar-img" loading="lazy">
+            } @else {
+            <div class="pp-identity__avatar-initials" aria-hidden="true">
+              {{ (e.first_name || '?')[0] | uppercase }}{{ (e.last_name || '')[0] | uppercase }}
             </div>
-            <div class="rate" *ngIf="expert.hourly_rate">
-                <mat-icon>attach_money</mat-icon>
-                <span>R$ {{ expert.hourly_rate }}/h</span>
+            }
+          </div>
+
+          <div class="pp-identity__info">
+            <h1 class="pp-identity__name">
+              {{ (e.first_name || e.full_name) ? ((e.first_name || '') + ' ' + (e.last_name || '')) : 'Nome não informado' }}
+              @if (e.is_verified) {
+              <span class="pp-badge pp-badge--verified" title="Perito verificado pela plataforma">
+                <mat-icon aria-hidden="true">verified</mat-icon>
+                Verificado
+              </span>
+              }
+              @if (e.is_featured) {
+              <span class="pp-badge pp-badge--featured" title="Perito em destaque">
+                <mat-icon aria-hidden="true">star</mat-icon>
+                Destaque
+              </span>
+              }
+            </h1>
+            <p class="pp-identity__title">{{ e.specialty || 'Especialidade não informada' }}</p>
+
+            <div class="pp-identity__meta">
+              @if (e.location || e.city) {
+              <span class="pp-meta-item">
+                <mat-icon aria-hidden="true">location_on</mat-icon>
+                {{ e.location || (e.city + (e.state ? ' - ' + e.state : '')) }}
+              </span>
+              }
+              @if (e.hourly_rate) {
+              <span class="pp-meta-item pp-meta-item--rate">
+                <mat-icon aria-hidden="true">payments</mat-icon>
+                R$ {{ e.hourly_rate }}/h
+              </span>
+              }
             </div>
-            <div class="actions">
-                <button mat-flat-button color="primary" (click)="openQuoteDialog()">
-                    <mat-icon>chat</mat-icon>
-                    Entrar em Contato
-                </button>
-            </div>
+
+            @if (e.availability_status) {
+            <span class="pp-avail"
+              [class.pp-avail--available]="e.availability_status === 'available'"
+              [class.pp-avail--busy]="e.availability_status === 'busy'"
+              [class.pp-avail--unavailable]="e.availability_status === 'unavailable'">
+              <mat-icon aria-hidden="true">circle</mat-icon>
+              @switch (e.availability_status) {
+                @case ('available') { Disponível para projetos }
+                @case ('busy') { Pouca disponibilidade }
+                @default { Indisponível no momento }
+              }
+            </span>
+            }
+          </div>
         </div>
+
+        <div class="pp-identity__actions">
+          <button mat-flat-button class="pp-btn-primary" (click)="openHireDialog()" [disabled]="!currentUserId()">
+            <mat-icon aria-hidden="true">handshake</mat-icon>
+            Contratar
+          </button>
+          <button mat-stroked-button class="pp-btn-outline" (click)="openReviewDialog()" [disabled]="!currentUserId()">
+            <mat-icon aria-hidden="true">star_rate</mat-icon>
+            Avaliar
+          </button>
+          @if (e.social_linkedin) {
+          <a [href]="e.social_linkedin" target="_blank" mat-icon-button class="pp-btn-icon" aria-label="LinkedIn">
+            <mat-icon aria-hidden="true">open_in_new</mat-icon>
+          </a>
+          }
+        </div>
+
+        @if (reviews().length > 0) {
+        <div class="pp-rating">
+          <div class="pp-rating__stars" aria-label="{{ averageRating().toFixed(1) }} de 5 estrelas">
+            @for (s of [1,2,3,4,5]; track s) {
+            <mat-icon [class.pp-rating__star--filled]="s <= averageRating()" aria-hidden="true">
+              {{ s <= averageRating() ? 'star' : 'star_border' }}
+            </mat-icon>
+            }
+          </div>
+          <span class="pp-rating__text">{{ averageRating().toFixed(1) }} · {{ reviews().length }} avaliação{{ reviews().length > 1 ? 'ões' : 'ão' }}</span>
+        </div>
+        }
+
+        @if (!currentUserId()) {
+        <p class="pp-login-hint">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <a routerLink="/login">Faça login</a> para contratar ou avaliar
+        </p>
+        }
+      </div>
     </div>
 
-    <div class="profile-content">
-        <mat-card>
-            <mat-card-content>
-                <h3>Sobre</h3>
-                <p class="bio">{{ expert.bio }}</p>
+    <!-- ═══════════════════════════════════════
+         MAIN + SIDEBAR GRID
+         ═══════════════════════════════════════ -->
+    <div class="pp-grid" [class.pp-grid--blurred]="!currentUserId()">
 
-                <mat-divider></mat-divider>
+      @if (!currentUserId()) {
+      <div class="pp-blur-overlay">
+        <div class="pp-blur-overlay__card">
+          <mat-icon aria-hidden="true" class="pp-blur-overlay__icon">lock</mat-icon>
+          <h3 class="pp-blur-overlay__title">Informações Restritas</h3>
+          <p class="pp-blur-overlay__text">Faça login para ver biografia, credenciais, contato e depoimentos completos do perito.</p>
+          <a mat-flat-button class="pp-btn-primary" routerLink="/login">
+            Entrar ou Criar Conta
+          </a>
+          <a mat-stroked-button routerLink="/search" class="pp-blur-overlay__search">
+            Buscar Peritos
+          </a>
+        </div>
+      </div>
+      }
 
-                <div class="details-grid">
-                    <div class="detail-item" *ngIf="expert.phone">
-                        <mat-icon>phone</mat-icon>
-                        <div>
-                            <label>Telefone</label>
-                            <span>{{ expert.phone }}</span>
-                        </div>
-                    </div>
-                    <!-- Removed email display for privacy/data consistency -->
+      <!-- ═══════════════ MAIN COLUMN ═══════════════ -->
+      <div class="pp-main">
+
+        <!-- Biografia Profissional -->
+        @if (e.bio) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">badge</mat-icon>
+            Biografia Profissional
+          </h2>
+          <p class="pp-section__bio">{{ e.bio }}</p>
+          @if (e.social_website || e.cv_url) {
+          <div class="pp-section__links">
+            @if (e.social_website) {
+            <a [href]="e.social_website" target="_blank" mat-stroked-button class="pp-link-btn">
+              <mat-icon aria-hidden="true">language</mat-icon> Website
+            </a>
+            }
+            @if (e.cv_url) {
+            <a [href]="e.cv_url" target="_blank" mat-flat-button class="pp-btn-primary">
+              <mat-icon aria-hidden="true">download</mat-icon> Baixar CV
+            </a>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Depoimentos de Clientes -->
+        @if (reviews().length > 0) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">forum</mat-icon>
+            Depoimentos de Clientes
+            <span class="pp-section__count">{{ reviews().length }}</span>
+          </h2>
+          <div class="pp-reviews">
+            @for (review of reviews(); track review.id) {
+            <div class="pp-review">
+              <div class="pp-review__avatar" aria-hidden="true">
+                {{ (review.client?.full_name || 'C')[0] | uppercase }}
+              </div>
+              <div class="pp-review__body">
+                <div class="pp-review__header">
+                  <strong>{{ review.client?.full_name || 'Cliente' }}</strong>
+                  <div class="pp-review__stars" aria-label="{{ review.rating }} de 5 estrelas">
+                    @for (s of [1,2,3,4,5]; track s) {
+                    <mat-icon [class.pp-rating__star--filled]="s <= review.rating" aria-hidden="true">
+                      {{ s <= review.rating ? 'star' : 'star_border' }}
+                    </mat-icon>
+                    }
+                  </div>
                 </div>
-            </mat-card-content>
-        </mat-card>
-    </div>
-</div>
-
-<ng-template #loadingOrError>
-    <div class="loading-container">
-        <p *ngIf="loading">Carregando perfil...</p>
-        <div *ngIf="!loading" class="error">
-            <mat-icon>error_outline</mat-icon>
-            <p>Perito não encontrado.</p>
-            <button mat-button color="primary" routerLink="/search">Voltar para busca</button>
+                @if (review.comment) {
+                <p class="pp-review__comment">{{ review.comment }}</p>
+                }
+                <small class="pp-review__date">{{ review.created_at | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </div>
+            }
+          </div>
         </div>
+        } @else if (reviews().length === 0 && expert()) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">forum</mat-icon>
+            Depoimentos de Clientes
+          </h2>
+          <div class="pp-reviews-empty">
+            <mat-icon aria-hidden="true">rate_review</mat-icon>
+            <p>Este perito ainda não tem depoimentos.</p>
+          </div>
+        </div>
+        }
+
+      </div>
+
+      <!-- ═══════════════ SIDEBAR ═══════════════ -->
+      <aside class="pp-sidebar">
+
+        <!-- Informações de Contato (Sticky CTA) -->
+        @if (e.phone || e.contact_phone || e.email || e.contact_email) {
+        <div class="pp-card pp-section pp-section--sticky">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">contact_mail</mat-icon>
+            Informações de Contato
+          </h2>
+          <div class="pp-contact">
+            @if (e.phone || e.contact_phone) {
+            <a [href]="'tel:' + (e.phone || e.contact_phone)" class="pp-contact__item pp-contact__item--action">
+              <div class="pp-contact__icon-wrap">
+                <mat-icon aria-hidden="true">phone</mat-icon>
+              </div>
+              <div class="pp-contact__text">
+                <span class="pp-contact__label">Telefone</span>
+                <span class="pp-contact__value">{{ e.phone || e.contact_phone }}</span>
+              </div>
+              <mat-icon class="pp-contact__chevron" aria-hidden="true">chevron_right</mat-icon>
+            </a>
+            }
+            @if (e.email || e.contact_email) {
+            <a [href]="'mailto:' + (e.email || e.contact_email)" class="pp-contact__item pp-contact__item--action">
+              <div class="pp-contact__icon-wrap">
+                <mat-icon aria-hidden="true">email</mat-icon>
+              </div>
+              <div class="pp-contact__text">
+                <span class="pp-contact__label">E-mail</span>
+                <span class="pp-contact__value">{{ e.email || e.contact_email }}</span>
+              </div>
+              <mat-icon class="pp-contact__chevron" aria-hidden="true">chevron_right</mat-icon>
+            </a>
+            }
+          </div>
+
+          <button mat-flat-button class="pp-btn-primary pp-contact__cta" (click)="openHireDialog()" [disabled]="!currentUserId()">
+            <mat-icon aria-hidden="true">handshake</mat-icon>
+            Solicitar Orçamento
+          </button>
+          @if (!currentUserId()) {
+          <p class="pp-contact__login-hint">
+            <a routerLink="/login">Faça login</a> para ver contato e solicitar orçamento
+          </p>
+          }
+        </div>
+        }
+
+        <!-- Competências -->
+        @if (e.tags && e.tags.length > 0) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">psychology</mat-icon>
+            Competências
+          </h2>
+          <div class="pp-tags">
+            @for (tag of e.tags; track tag) {
+            <span class="pp-tag">{{ tag }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Credenciais e Registros -->
+        @if (e.certifications && e.certifications.length > 0) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">workspace_premium</mat-icon>
+            Credenciais e Registros
+          </h2>
+          <div class="pp-certs-list">
+            @for (cert of e.certifications; track $index) {
+            <div class="pp-cert-item">
+              <div class="pp-cert-item__badge">
+                <mat-icon aria-hidden="true">verified</mat-icon>
+              </div>
+              <div class="pp-cert-item__body">
+                <strong class="pp-cert-item__name">{{ cert.name }}</strong>
+                <span class="pp-cert-item__org">{{ cert.issuer }}</span>
+                @if (cert.date) {
+                <span class="pp-cert-item__date">{{ cert.date }}</span>
+                }
+                @if (cert.credential_url) {
+                <a [href]="cert.credential_url" target="_blank" class="pp-cert-item__link">
+                  <mat-icon aria-hidden="true">open_in_new</mat-icon> Ver credencial
+                </a>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Serviços e Honorários -->
+        @if (services().length > 0) {
+        <div class="pp-card pp-section">
+          <h2 class="pp-section__title">
+            <mat-icon aria-hidden="true">request_quote</mat-icon>
+            Serviços e Honorários
+          </h2>
+          <div class="pp-services-list">
+            @for (svc of services(); track svc.id) {
+            <div class="pp-service-item">
+              <div class="pp-service-item__header">
+                <strong class="pp-service-item__name">{{ svc.service_name }}</strong>
+                @if (svc.base_price) {
+                <span class="pp-service-item__price">
+                  R$ {{ svc.base_price | number:'1.2-2' }}
+                  <small>{{ priceUnitLabels[svc.price_unit] }}</small>
+                </span>
+                } @else {
+                <span class="pp-service-item__price pp-service-item__price--consult">Sob consulta</span>
+                }
+              </div>
+              @if (svc.description) {
+              <p class="pp-service-item__desc">{{ svc.description }}</p>
+              }
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+      </aside>
+
     </div>
-</ng-template>
+  </div>
+  }
+
+</main>

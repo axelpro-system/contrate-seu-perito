@@ -4,25 +4,40 @@
     <div class="card-content-wrapper">
         <div class="avatar-section">
             <div class="avatar-placeholder">
-                {{ expert.name.charAt(0) }}
+                {{ expert?.name?.charAt(0) || '?' }}
             </div>
+            <button class="fav-btn" (click)="favSvc.toggle(expert.id); $event.stopPropagation()" [class.fav-active]="favSvc.isFavorite(expert.id)" aria-label="Favoritar">
+                <mat-icon>{{ favSvc.isFavorite(expert.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+            </button>
         </div>
 
         <div class="info-section">
-            <mat-card-title>{{ expert.name }}</mat-card-title>
-            <mat-card-subtitle>{{ expert.title }}</mat-card-subtitle>
+            <mat-card-title>
+              {{ expert?.name || 'Perito' }}
+              @if (expert?.is_verified) {
+              <mat-icon class="verified-badge" aria-hidden="true" title="Perito verificado">verified</mat-icon>
+              }
+            </mat-card-title>
+            <mat-card-subtitle>{{ expert?.title || 'Especialista' }}</mat-card-subtitle>
 
+            @if (expert?.rating > 0) {
             <div class="rating">
                 <mat-icon class="star">star</mat-icon>
                 <span>{{ expert.rating }}</span>
+                @if (expert?.reviewsCount > 0) {
                 <span class="reviews">({{ expert.reviewsCount }})</span>
+                }
             </div>
+            }
 
+            @if (expert?.location) {
             <div class="location">
                 <mat-icon>location_on</mat-icon>
                 {{ expert.location }}
             </div>
+            }
 
+            @if (expert?.specialties?.length > 0) {
             <mat-chip-set class="specialties">
                 @for (specialty of expert.specialties.slice(0, 2); track specialty) {
                 <mat-chip>{{ specialty }}</mat-chip>
@@ -31,6 +46,7 @@
                 <mat-chip>+{{ expert.specialties.length - 2 }}</mat-chip>
                 }
             </mat-chip-set>
+            }
         </div>
     </div>
 
@@ -39,7 +55,7 @@
     <mat-card-actions>
         <div class="price">
             <span class="label">A partir de</span>
-            <span class="value">{{ expert.hourlyRate }}</span>
+            <span class="value">{{ expert?.hourlyRate || 'Sob consulta' }}</span>
         </div>
         <a mat-flat-button color="primary" [routerLink]="['/expert', expert.id]">Ver Perfil</a>
     </mat-card-actions>

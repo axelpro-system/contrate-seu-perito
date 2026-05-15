@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormService } from '../../services/form.service';
+import { ProfileType } from '../../types';
 
 @Component({
     selector: 'app-register',
@@ -22,56 +24,41 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     ],
     templateUrl: './register.html',
     styleUrl: './register.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
-    registerForm: FormGroup;
+    registerForm: import('@angular/forms').FormGroup;
     loading = false;
+    submitting = false;
 
     constructor(
-        private fb: FormBuilder,
+        private formService: FormService,
         private supabaseService: SupabaseService,
         private router: Router,
         private snackBar: MatSnackBar
     ) {
-        this.registerForm = this.fb.group({
-            name: ['', [Validators.required]],
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-            confirmPassword: ['', [Validators.required]]
-        }, { validator: this.passwordMatchValidator });
-    }
-
-    passwordMatchValidator(g: FormGroup) {
-        return g.get('password')?.value === g.get('confirmPassword')?.value
-            ? null : { 'mismatch': true };
+        this.registerForm = this.formService.createRegisterForm();
     }
 
     async onSubmit() {
-        if (this.registerForm.valid) {
-            this.loading = true;
-            const { name, email, password } = this.registerForm.value;
+        if (!this.formService.validateForm(this.registerForm) || this.submitting) return;
+        this.submitting = true;
+        const { name, email, password } = this.registerForm.value;
+        try {
+            const sanitized = {
+                full_name: this.formService.sanitizeString(name),
+                profile_type: ProfileType.CONTRATANTE,
+                profile_visible: true,
+            };
+            const { error } = await this.supabaseService.signUp(email, password, sanitized);
+            if (error) throw error;
 
-            try {
-                // 1. Sign up the user
-                const { data: authData, error: authError } = await this.supabaseService.signUp(email, password, {
-                    full_name: name,
-                    role: 'client'
-                });
-
-                if (authError) throw authError;
-
-                // 2. Create profile entry (Supabase RLS should handle this, but we ensure the profile data is passed)
-                // Note: Supabase signUp options.data automatically populates the user metadata.
-                // We rely on a Supabase trigger to create the 'profiles' entry upon new user creation.
-
-                this.snackBar.open('Cadastro realizado! Verifique seu email para confirmar a conta.', 'Fechar', { duration: 5000 });
-                this.router.navigate(['/login']);
-
-            } catch (error: any) {
-                this.snackBar.open(error.message || 'Erro ao cadastrar cliente.', 'Fechar', { duration: 3000 });
-            } finally {
-                this.loading = false;
-            }
+            this.snackBar.open('Cadastro realizado! Verifique seu email para confirmar.', 'Fechar', { duration: 5000 });
+            this.router.navigate(['/login']);
+        } catch (error: any) {
+            this.snackBar.open(error.message || 'Erro ao cadastrar', 'Fechar', { duration: 3000 });
+        } finally {
+            this.submitting = false;
         }
     }
 }

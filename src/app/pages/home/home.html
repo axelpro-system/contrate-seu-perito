@@ -1,20 +1,34 @@
-<div class="home-container">
+<main class="home-container">
     <!-- Hero Section -->
     <section class="hero-section">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
         <div class="hero-content">
-            <h1>Encontre o Perito Ideal para o seu Caso</h1>
-            <p>Conectamos você aos melhores especialistas certificados pelo IBCAPPA.</p>
+            <div class="hero-badge scroll-animate" data-delay="0">
+                <mat-icon>verified</mat-icon>
+                <span>Peritos certificados pelo IBCAPPA</span>
+            </div>
+            <h1 id="main-heading" class="scroll-animate" data-delay="100">
+                Encontre o Perito Ideal<br>para o seu Caso
+            </h1>
+            <p class="hero-subtitle scroll-animate" data-delay="200">
+                Conectamos você aos melhores especialistas certificados. Solicite orçamentos gratuitos e receba propostas em poucas horas.
+            </p>
 
-            <div class="search-card">
+            <div class="search-card scroll-animate" data-delay="300">
                 <div class="search-fields">
                     <mat-form-field appearance="outline" class="search-input">
-                        <mat-label>O que você precisa?</mat-label>
-                        <input matInput placeholder="Ex: Perícia Médica" [(ngModel)]="searchTerm">
+                        <mat-label for="search-term">O que você precisa?</mat-label>
+                        <input matInput id="search-term" name="searchTerm" autocomplete="off" spellcheck="false" placeholder="Ex: Perícia Médica, Engenharia Civil..." [(ngModel)]="searchTerm">
+                        <mat-icon matSuffix>search</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="filter-select">
-                        <mat-label>Especialidade</mat-label>
-                        <mat-select [(ngModel)]="selectedSpecialty">
+                        <mat-label for="search-specialty">Especialidade</mat-label>
+                        <mat-select id="search-specialty" name="specialty" [(ngModel)]="selectedSpecialty">
                             <mat-option [value]="''">Todas</mat-option>
                             @for (specialty of specialties; track specialty) {
                             <mat-option [value]="specialty">{{specialty}}</mat-option>
@@ -23,8 +37,8 @@
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="filter-select">
-                        <mat-label>Localização</mat-label>
-                        <mat-select [(ngModel)]="selectedLocation">
+                        <mat-label for="search-location">Localização</mat-label>
+                        <mat-select id="search-location" name="location" [(ngModel)]="selectedLocation">
                             <mat-option [value]="''">Todas</mat-option>
                             @for (location of locations; track location) {
                             <mat-option [value]="location">{{location}}</mat-option>
@@ -33,46 +47,175 @@
                     </mat-form-field>
                 </div>
 
-                <button mat-flat-button color="primary" class="search-button" (click)="onSearch()">
+                <button mat-flat-button color="primary" type="submit" class="search-button" (click)="onSearch()">
+                    <mat-icon>search</mat-icon>
                     Buscar Peritos
                 </button>
+            </div>
+
+            <div class="hero-trust scroll-animate" data-delay="400">
+                <div class="trust-avatars">
+                    <div class="avatar">JD</div>
+                    <div class="avatar">MA</div>
+                    <div class="avatar">CL</div>
+                    <div class="avatar">+500</div>
+                </div>
+                <span class="trust-text">Mais de 500 peritos já cadastrados</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section scroll-animate" aria-labelledby="stats-heading">
+        <div class="stats-grid">
+            @for (stat of stats; track stat.label) {
+            <div class="stat-item">
+                <div class="stat-value">{{stat.value}}{{stat.suffix}}</div>
+                <div class="stat-label">{{stat.label}}</div>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section" aria-labelledby="how-heading">
+        <div class="section-header scroll-animate">
+            <span class="section-tag">Processo Simples</span>
+            <h2 id="how-heading">Como Funciona</h2>
+            <p>Três passos para encontrar o perito ideal para o seu caso</p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card scroll-animate" data-delay="0">
+                <div class="step-number">01</div>
+                <div class="step-icon">
+                    <mat-icon>search</mat-icon>
+                </div>
+                <h3>Busque</h3>
+                <p>Utilize nossos filtros avançados para encontrar peritos por especialidade, localização e avaliação.</p>
+            </div>
+
+            <div class="step-connector">
+                <div class="connector-line"></div>
+            </div>
+
+            <div class="step-card scroll-animate" data-delay="150">
+                <div class="step-number">02</div>
+                <div class="step-icon">
+                    <mat-icon>chat</mat-icon>
+                </div>
+                <h3>Solicite</h3>
+                <p>Envie sua solicitação de orçamento diretamente pelo nosso sistema. É rápido e gratuito.</p>
+            </div>
+
+            <div class="step-connector">
+                <div class="connector-line"></div>
+            </div>
+
+            <div class="step-card scroll-animate" data-delay="300">
+                <div class="step-number">03</div>
+                <div class="step-icon">
+                    <mat-icon>handshake</mat-icon>
+                </div>
+                <h3>Contrate</h3>
+                <p>Compare as propostas, escolha o melhor profissional e feche o negócio com segurança.</p>
             </div>
         </div>
     </section>
 
     <!-- Featured Experts Section -->
-    <section class="featured-section">
-        <div class="section-header">
-            <h2>Peritos em Destaque</h2>
+    <section class="featured-section" aria-labelledby="featured-heading">
+        <div class="section-header scroll-animate">
+            <span class="section-tag">Destaques</span>
+            <h2 id="featured-heading">Peritos em Destaque</h2>
             <p>Profissionais mais bem avaliados da semana</p>
         </div>
 
         <div class="experts-grid">
-            @for (expert of featuredExperts; track expert.id) {
-            <app-expert-card [expert]="expert"></app-expert-card>
+            @if (loadingFeatured) {
+            <div class="loading-state" aria-live="polite">
+                <div class="loading-spinner"></div>
+                <p>Carregando peritos...</p>
+            </div>
+            } @else if (featuredExperts.length === 0) {
+            <div class="empty-state" aria-live="polite">
+                <mat-icon aria-hidden="true">search_off</mat-icon>
+                <p>Nenhum perito disponível no momento.</p>
+            </div>
+            } @else {
+            @for (expert of featuredExperts; track expert.id; let i = $index) {
+            <app-expert-card [expert]="expert" class="scroll-animate" [attr.data-delay]="i * 100"></app-expert-card>
             }
+            }
+        </div>
+
+        <div class="section-cta scroll-animate">
+            <a mat-stroked-button color="primary" routerLink="/search" class="view-all-btn">
+                Ver todos os peritos
+                <mat-icon>arrow_forward</mat-icon>
+            </a>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features-section">
-        <h2>Por que usar nossa plataforma?</h2>
+    <section class="features-section" aria-labelledby="features-heading">
+        <div class="section-header scroll-animate">
+            <span class="section-tag">Por que nós</span>
+            <h2 id="features-heading">Por que usar nossa plataforma?</h2>
+            <p>Tudo o que você precisa para encontrar o especialista certo</p>
+        </div>
         <div class="features-grid">
-            <div class="feature-card">
-                <mat-icon class="feature-icon">verified_user</mat-icon>
+            <div class="feature-card scroll-animate" data-delay="0">
+                <div class="feature-icon-wrapper">
+                    <mat-icon aria-hidden="true" class="feature-icon">verified_user</mat-icon>
+                </div>
                 <h3>Peritos Verificados</h3>
-                <p>Todos os profissionais são certificados e validados pelo IBCAPPA.</p>
+                <p>Todos os profissionais são certificados e validados pelo IBCAPPA. Garantimos a autenticidade de cada cadastro.</p>
             </div>
-            <div class="feature-card">
-                <mat-icon class="feature-icon">speed</mat-icon>
+            <div class="feature-card scroll-animate" data-delay="100">
+                <div class="feature-icon-wrapper">
+                    <mat-icon aria-hidden="true" class="feature-icon">speed</mat-icon>
+                </div>
                 <h3>Rápido e Fácil</h3>
-                <p>Encontre especialistas e solicite cotações em poucos cliques.</p>
+                <p>Encontre especialistas e solicite cotações em poucos cliques. Sem burocracia, sem complicação.</p>
             </div>
-            <div class="feature-card">
-                <mat-icon class="feature-icon">security</mat-icon>
-                <h3>Segurança</h3>
-                <p>Negocie com confiança e transparência.</p>
+            <div class="feature-card scroll-animate" data-delay="200">
+                <div class="feature-icon-wrapper">
+                    <mat-icon aria-hidden="true" class="feature-icon">security</mat-icon>
+                </div>
+                <h3>Segurança Total</h3>
+                <p>Negocie com confiança e transparência. Seus dados e transações estão sempre protegidos.</p>
+            </div>
+            <div class="feature-card scroll-animate" data-delay="300">
+                <div class="feature-icon-wrapper">
+                    <mat-icon aria-hidden="true" class="feature-icon">support_agent</mat-icon>
+                </div>
+                <h3>Suporte Dedicado</h3>
+                <p>Nossa equipe está pronta para ajudar em todas as etapas, do primeiro contato até a conclusão do serviço.</p>
             </div>
         </div>
     </section>
-</div>
+
+    <!-- CTA Section -->
+    <section class="cta-section scroll-animate">
+        <div class="cta-content">
+            <div class="cta-text">
+                <h2>É perito e quer mais clientes?</h2>
+                <p>Junte-se à maior plataforma de peritos do Brasil e comece a receber solicitações de orçamento hoje mesmo.</p>
+            </div>
+            <div class="cta-actions">
+                <a mat-flat-button routerLink="/register-expert" class="cta-primary-btn">
+                    Cadastrar como Perito
+                    <mat-icon>arrow_forward</mat-icon>
+                </a>
+                <a mat-stroked-button routerLink="/search" class="cta-secondary-btn">
+                    Buscar Peritos
+                </a>
+            </div>
+        </div>
+        <div class="cta-shapes">
+            <div class="cta-shape cta-shape-1"></div>
+            <div class="cta-shape cta-shape-2"></div>
+        </div>
+    </section>
+</main>

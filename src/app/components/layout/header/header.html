@@ -1,17 +1,169 @@
-<mat-toolbar color="primary" class="header-toolbar">
-    <span class="logo" routerLink="/">Contrate o seu Perito</span>
+<mat-toolbar class="header-toolbar">
+    <img src="assets/logo.png" alt="Contrate o seu Perito" class="logo-img" width="130" height="40" routerLink="/" (click)="closeMobileMenu()">
 
     <span class="spacer"></span>
 
-    <div class="nav-links">
-        <a mat-button routerLink="/search">Buscar Peritos</a>
-        <a mat-button routerLink="/register-expert" class="cta-expert">Sou Perito</a>
+    <button mat-icon-button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-label]="mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'">
+        <mat-icon aria-hidden="true">{{ mobileMenuOpen ? 'close' : 'menu' }}</mat-icon>
+    </button>
 
-        @if (authService.isAuthenticated()) {
-        <a mat-button [routerLink]="dashboardLink">Painel</a>
-        <button mat-button (click)="onLogout()">Sair</button>
-        } @else {
-        <a mat-button routerLink="/login">Entrar</a>
-        }
+    <!-- Desktop: not authenticated -->
+    @if (!isAuthenticated) {
+    <div class="nav-links">
+        <a mat-button routerLink="/search" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Buscar Peritos
+        </a>
+        <a mat-flat-button routerLink="/register-expert" class="nav-btn nav-btn--orange" routerLinkActive="active-link">
+            Sou Perito
+        </a>
+        <a mat-stroked-button routerLink="/login" routerLinkActive="active-link" class="nav-btn nav-btn--outline">
+            Entrar
+        </a>
     </div>
+    }
+
+    @if (isAuthenticated) {
+    <div class="nav-links">
+        <a mat-button routerLink="/search" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Buscar Peritos
+        </a>
+
+        @if (isExpert) {
+        <a mat-button routerLink="/expert-dashboard" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Dashboard
+        </a>
+        <a mat-button routerLink="/expert/quotes" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Leads
+        </a>
+        <a mat-button routerLink="/expert/edit" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Meu Perfil
+        </a>
+        }
+
+        @if (isClient) {
+        <a mat-button routerLink="/client-dashboard" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Cotações
+        </a>
+        <a mat-button routerLink="/client-requests" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Pedidos
+        </a>
+        }
+
+        @if (isAdmin) {
+        <a mat-button routerLink="/admin" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Admin
+        </a>
+        }
+
+        <button mat-icon-button class="notif-btn" [matMenuTriggerFor]="notifMenu" (click)="notifSvc.markAllAsRead()">
+            <mat-icon [class.notif-has]="notifSvc.unreadCount() > 0" aria-hidden="true">{{ notifSvc.unreadCount() > 0 ? 'notifications_active' : 'notifications' }}</mat-icon>
+            @if (notifSvc.unreadCount() > 0) {
+            <span class="notif-badge">{{ notifSvc.unreadCount() }}</span>
+            }
+        </button>
+        <mat-menu #notifMenu="matMenu" class="notif-menu">
+            @if (notifSvc.notifications().length === 0) {
+            <button mat-menu-item disabled style="color:#9CA3AF;font-size:0.85rem;text-align:center;pointer-events:none;">
+                Nenhuma notificação
+            </button>
+            } @else {
+            @for (n of notifSvc.notifications().slice(0, 10); track n.id) {
+            <button mat-menu-item (click)="notifSvc.markAsRead(n.id)" [class.notif-unread]="!n.read">
+                <div class="notif-item">
+                    <span class="notif-title">{{ n.title }}</span>
+                    @if (n.body) { <span class="notif-body">{{ n.body }}</span> }
+                    <span class="notif-time">{{ n.created_at | date:'dd/MM HH:mm' }}</span>
+                </div>
+            </button>
+            }
+            @if (notifSvc.notifications().length > 10) {
+            <mat-divider></mat-divider>
+            <button mat-menu-item disabled style="color:#9CA3AF;font-size:0.8rem;text-align:center;">
+                + {{ notifSvc.notifications().length - 10 }} mais
+            </button>
+            }
+            }
+        </mat-menu>
+
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+            <mat-icon aria-hidden="true">account_circle</mat-icon>
+            <span class="user-name">{{ displayName }}</span>
+            <mat-icon aria-hidden="true" class="arrow">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu">
+            @if (isAdmin) { <button mat-menu-item routerLink="/admin">Painel Admin</button> }
+            @if (isExpert) { <button mat-menu-item routerLink="/expert/edit">Editar Perfil</button> }
+            @if (isExpert) { <button mat-menu-item routerLink="/expert/quotes">Leads Recebidos</button> }
+            @if (isClient) { <button mat-menu-item routerLink="/client-dashboard">Minhas Cotações</button> }
+            <button mat-menu-item routerLink="/search">Buscar Peritos</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="logout()">
+                <mat-icon aria-hidden="true" color="warn">exit_to_app</mat-icon> Sair
+            </button>
+        </mat-menu>
+    </div>
+    }
 </mat-toolbar>
+
+<!-- Mobile menu -->
+@if (mobileMenuOpen) {
+<div class="mobile-nav-overlay" (click)="closeMobileMenu()"></div>
+<div class="mobile-nav">
+
+    @if (!isAuthenticated) {
+    <a mat-button routerLink="/search" (click)="closeMobileMenu()">
+        <mat-icon>search</mat-icon> Buscar Peritos
+    </a>
+    <a mat-button routerLink="/register-expert" class="cta-expert" (click)="closeMobileMenu()">
+        <mat-icon>person_add</mat-icon> Sou Perito
+    </a>
+    <a mat-button routerLink="/login" (click)="closeMobileMenu()">
+        <mat-icon>login</mat-icon> Entrar
+    </a>
+    }
+
+    @if (isAuthenticated) {
+    <div class="mobile-user-info">
+        <mat-icon aria-hidden="true">account_circle</mat-icon>
+        <span>{{ displayName }}</span>
+    </div>
+    <mat-divider></mat-divider>
+
+    <a mat-button routerLink="/search" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">search</mat-icon> Buscar Peritos
+    </a>
+
+    @if (isAdmin) {
+    <a mat-button routerLink="/admin" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">shield</mat-icon> Painel Admin
+    </a>
+    }
+
+    @if (isExpert) {
+    <a mat-button routerLink="/expert-dashboard" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">dashboard</mat-icon> Dashboard
+    </a>
+    <a mat-button routerLink="/expert/quotes" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">assignment</mat-icon> Leads Recebidos
+    </a>
+    <a mat-button routerLink="/expert/edit" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">edit</mat-icon> Editar Perfil
+    </a>
+    }
+
+    @if (isClient) {
+    <a mat-button routerLink="/client-dashboard" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">inbox</mat-icon> Minhas Cotações
+    </a>
+    <a mat-button routerLink="/client-requests" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">send</mat-icon> Meus Pedidos
+    </a>
+    }
+
+    <mat-divider></mat-divider>
+    <a mat-button (click)="logout()" class="logout-btn">
+        <mat-icon aria-hidden="true" color="warn">exit_to_app</mat-icon> Sair
+    </a>
+    }
+</div>
+}

@@ -1,34 +1,38 @@
 import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
-import { ExpertProfile } from './pages/expert-profile/expert-profile';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Login } from './pages/login/login';
-import { RegisterExpert } from './pages/register-expert/register-expert';
-import { ExpertCard } from './components/expert-card/expert-card';
-import { SearchExperts } from './pages/search-experts/search-experts';
-import { Register } from './pages/register/register';
-
-import { ExpertProfileEdit } from './pages/expert-profile-edit/expert-profile-edit';
-
-import { ClientDashboard } from './pages/client-dashboard/client-dashboard';
-import { ExpertDashboard } from './pages/expert-dashboard/expert-dashboard';
-
 import { authGuard } from './guards/auth.guard';
-
-import { ForgotPassword } from './pages/forgot-password/forgot-password';
+import { adminGuard } from './guards/admin.guard';
+import { expertGuard } from './guards/expert.guard';
 
 export const routes: Routes = [
     { path: '', component: Home },
-    { path: 'client-dashboard', component: ClientDashboard, canActivate: [authGuard] },
-    { path: 'expert-dashboard', component: ExpertDashboard, canActivate: [authGuard] },
-    { path: 'expert/edit', component: ExpertProfileEdit, canActivate: [authGuard] },
-    { path: 'expert/:id', component: ExpertProfile },
-    { path: 'dashboard', component: Dashboard, canActivate: [authGuard] }, // Keep for fallback or admin
-    { path: 'login', component: Login },
-    { path: 'forgot-password', component: ForgotPassword },
-    { path: 'register-expert', component: RegisterExpert },
-    { path: 'register', component: Register },
-    { path: 'search', component: SearchExperts },
-    { path: 'expert-card', component: ExpertCard },
-    { path: '**', redirectTo: '' }
+    { path: 'client-dashboard', loadComponent: () => import('./pages/client-dashboard/client-dashboard').then(m => m.ClientDashboard), canActivate: [authGuard] },
+    { path: 'expert-dashboard', loadComponent: () => import('./pages/expert-dashboard/expert-dashboard').then(m => m.ExpertDashboard), canActivate: [authGuard] },
+    { path: 'expert/quotes', loadComponent: () => import('./pages/expert-leads/expert-leads').then(m => m.ExpertLeads), canActivate: [authGuard] },
+    { path: 'expert/onboarding', loadComponent: () => import('./pages/expert-onboarding/expert-onboarding').then(m => m.ExpertOnboarding), canActivate: [authGuard] },
+    { path: 'expert/edit', loadComponent: () => import('./pages/expert-profile-edit/expert-profile-edit').then(m => m.ExpertProfileEdit), canActivate: [authGuard, expertGuard] },
+    { path: 'expert/:id', loadComponent: () => import('./pages/expert-profile/expert-profile').then(m => m.ExpertProfile) },
+    { path: 'admin', loadComponent: () => import('./pages/admin-dashboard/admin-layout').then(m => m.AdminLayout), canActivate: [authGuard, adminGuard],
+      children: [
+        { path: '', loadComponent: () => import('./pages/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard) },
+        { path: 'users', loadComponent: () => import('./pages/admin-dashboard/admin-users').then(m => m.AdminUsers) },
+        { path: 'users/:id/edit', loadComponent: () => import('./pages/admin-dashboard/admin-user-edit').then(m => m.AdminUserEdit) },
+        { path: 'specialties', loadComponent: () => import('./pages/admin-dashboard/admin-specialties').then(m => m.AdminSpecialties) },
+        { path: 'logs', loadComponent: () => import('./pages/admin-dashboard/admin-logs').then(m => m.AdminLogs) },
+        { path: 'pending-experts', loadComponent: () => import('./pages/admin-dashboard/admin-pending-experts').then(m => m.AdminPendingExperts) },
+      ]
+    },
+    { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard), canActivate: [authGuard] },
+    { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
+    { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword) },
+    { path: 'register-expert', loadComponent: () => import('./pages/register-expert/register-expert').then(m => m.RegisterExpert) },
+    { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.Register) },
+    { path: 'search', loadComponent: () => import('./pages/search-experts/search-experts').then(m => m.SearchExperts) },
+    { path: 'auth/callback', loadComponent: () => import('./pages/auth-callback/auth-callback').then(m => m.AuthCallback) },
+    { path: 'email-confirmation', loadComponent: () => import('./pages/email-confirmation/email-confirmation').then(m => m.EmailConfirmation) },
+    { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword) },
+    { path: 'terms', loadComponent: () => import('./pages/terms/terms').then(m => m.Terms) },
+    { path: 'privacy', loadComponent: () => import('./pages/privacy/privacy').then(m => m.Privacy) },
+    { path: 'support', loadComponent: () => import('./pages/support/support').then(m => m.SupportPage) },
+    { path: '**', redirectTo: '' },
 ];
