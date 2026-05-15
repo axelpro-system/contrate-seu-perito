@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use 'app/styles/tokens' as tokens;
 
 @include mat.core();
 
@@ -182,4 +183,110 @@ h6 {
 
 .bg-white {
     background-color: #ffffff;
+}
+
+// Mobile-first responsive utilities
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+
+    @media (min-width: 768px) {
+        padding: 0 24px;
+    }
+}
+
+.hide-mobile {
+    @media (max-width: 767px) {
+        display: none !important;
+    }
+}
+
+.hide-desktop {
+    @media (min-width: 768px) {
+        display: none !important;
+    }
+}
+
+// Touch-friendly global overrides
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-stroked-button,
+.mat-mdc-flat-button,
+.mat-mdc-unelevated-button {
+    @media (max-width: 767px) {
+        min-height: 44px;
+        padding: 0 16px;
+    }
+}
+
+// Icon buttons must be 44x44 minimum
+.mat-mdc-icon-button {
+    @media (max-width: 767px) {
+        width: 44px !important;
+        height: 44px !important;
+        line-height: 44px !important;
+    }
+    .mat-mdc-button-touch-target {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+// Chips need larger touch targets
+.mat-mdc-chip {
+    @media (max-width: 767px) {
+        min-height: 36px;
+        padding: 0 12px;
+    }
+}
+
+// Form fields need larger touch targets on mobile
+.mat-mdc-form-field {
+    @media (max-width: 767px) {
+        .mat-mdc-text-field-wrapper {
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+    }
+}
+
+// Slide toggles need larger touch area
+.mat-mdc-slide-toggle {
+    @media (max-width: 767px) {
+        padding: 8px 0;
+    }
+}
+
+// Tab labels need larger touch targets
+.mat-mdc-tab {
+    @media (max-width: 767px) {
+        min-height: 48px;
+        padding: 0 16px;
+    }
+}
+
+// Ensure touch feedback on mobile
+@media (max-width: 767px) {
+    button:active,
+    a:active,
+    [role="button"]:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+// Ensure dialogs are full-width on mobile
+.mat-mdc-dialog-surface {
+    @media (max-width: 480px) {
+        border-radius: 16px 16px 0 0 !important;
+    }
+}
+
+.mat-mdc-dialog-container {
+    @media (max-width: 480px) {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
 }

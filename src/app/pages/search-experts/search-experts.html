@@ -1,62 +1,164 @@
-<div class="search-container">
-    <div class="search-header">
-        <h1>Encontre um Perito</h1>
-        <p>Busque por nome, especialidade ou cidade</p>
+<!-- Hero -->
+<div class="se-hero">
+  <h1>Encontre um Perito</h1>
+  <p>Conectamos você aos melhores profissionais especializados do Brasil</p>
+</div>
+
+<!-- Body -->
+<div class="se-body">
+
+  <!-- Sidebar -->
+  <aside class="se-sidebar" [class.se-sidebar--open]="filtersOpen()">
+    <button class="se-sidebar__close" mat-icon-button (click)="toggleFilters()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Name search -->
+    <div class="se-sidebar__search-wrap">
+      <mat-icon class="se-sidebar__search-icon">search</mat-icon>
+      <input class="se-sidebar__search-input"
+             placeholder="Buscar por nome..."
+             [value]="searchForm.get('name')?.value"
+             (input)="onNameInput($any($event.target).value)">
     </div>
 
-    <form [formGroup]="searchForm" (ngSubmit)="searchExperts()" class="search-form">
-        <mat-form-field appearance="outline">
-            <mat-label>Nome</mat-label>
-            <input matInput formControlName="name" placeholder="Nome do perito">
-            <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>Especialidade</mat-label>
-            <input matInput formControlName="specialty" placeholder="Ex: Engenharia">
-            <mat-icon matSuffix>work</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-            <mat-label>Cidade</mat-label>
-            <input matInput formControlName="city" placeholder="Cidade">
-            <mat-icon matSuffix>location_on</mat-icon>
-        </mat-form-field>
-
-        <button mat-flat-button color="primary" type="submit" [disabled]="loading">
-            {{ loading ? 'Buscando...' : 'Buscar' }}
+    <!-- Specialty list -->
+    <div class="se-sidebar__section">
+      <label class="se-sidebar__label">ESPECIALIDADE</label>
+      <div class="se-spec-list">
+        <button class="se-spec-item" [class.se-spec-item--active]="selectedSpecialty() === ''"
+                (click)="selectSpecialty('')">
+          <mat-icon>grid_view</mat-icon>
+          <span>Todas</span>
         </button>
-    </form>
-
-    <div class="results-grid">
-        @for (expert of experts; track expert.id) {
-        <mat-card class="expert-card">
-            <mat-card-header>
-                <div mat-card-avatar class="expert-avatar"
-                    [style.background-image]="'url(' + (expert.avatar_url || 'assets/default-avatar.png') + ')'"></div>
-                <mat-card-title>{{ expert.full_name }}</mat-card-title>
-                <mat-card-subtitle>{{ expert.specialty }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-                <p class="bio">{{ expert.bio | slice:0:100 }}{{ expert.bio?.length > 100 ? '...' : '' }}</p>
-                <div class="info-row">
-                    <mat-icon>location_on</mat-icon>
-                    <span>{{ expert.city }} - {{ expert.state }}</span>
-                </div>
-                <div class="info-row" *ngIf="expert.hourly_rate">
-                    <mat-icon>attach_money</mat-icon>
-                    <span>R$ {{ expert.hourly_rate }}/h</span>
-                </div>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-stroked-button color="primary" [routerLink]="['/expert', expert.id]">Ver Perfil</button>
-            </mat-card-actions>
-        </mat-card>
-        } @empty {
-        <div class="no-results" *ngIf="!loading">
-            <mat-icon>sentiment_dissatisfied</mat-icon>
-            <p>Nenhum perito encontrado com esses critérios.</p>
-        </div>
+        @for (s of specialtiesList; track s) {
+          <button class="se-spec-item" [class.se-spec-item--active]="selectedSpecialty() === s"
+                  (click)="selectSpecialty(s)">
+            <mat-icon>chevron_right</mat-icon>
+            <span>{{ s }}</span>
+          </button>
         }
+      </div>
     </div>
+  </aside>
+
+  @if (filtersOpen()) {
+    <div class="se-sidebar-overlay" (click)="toggleFilters()"></div>
+  }
+
+  <!-- Results -->
+  <main class="se-results">
+
+    <!-- Toolbar -->
+    <div class="se-toolbar">
+      <button class="se-toolbar__filter-btn" mat-icon-button (click)="toggleFilters()" aria-label="Filtros">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      @if (!searching() && searched()) {
+        <span class="se-toolbar__count">{{ experts().length }} perito{{ experts().length !== 1 ? 's' : '' }} encontrado{{ experts().length !== 1 ? 's' : '' }}</span>
+      }
+
+      <div class="se-toolbar__spacer"></div>
+
+      <mat-form-field appearance="outline" class="se-order-field" subscriptSizing="dynamic">
+        <mat-select [formControl]="orderControl">
+          <mat-option value="rating">Melhor avaliação</mat-option>
+          <mat-option value="hourly_rate_asc">Menor preço</mat-option>
+          <mat-option value="hourly_rate_desc">Maior preço</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Skeleton -->
+    @if (searching()) {
+      <div class="se-grid" aria-busy="true">
+        @for (_ of [1,2,3,4,5,6]; track _) {
+          <div class="se-skeleton">
+            <div class="se-skeleton__banner"></div>
+            <div class="se-skeleton__avatar"></div>
+            <div class="se-skeleton__lines">
+              <div class="se-skeleton__line se-skeleton__line--name"></div>
+              <div class="se-skeleton__line se-skeleton__line--sub"></div>
+              <div class="se-skeleton__line se-skeleton__line--short"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error(); as errMsg) {
+      <div class="se-state se-state--error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <h3>Erro ao carregar</h3>
+        <p>{{ errMsg }}</p>
+        <button mat-flat-button (click)="searchExperts()">Tentar novamente</button>
+      </div>
+    }
+
+    <!-- Grid -->
+    @if (!searching() && !error()) {
+      <div class="se-grid">
+        @for (expert of experts(); track expert.id) {
+          <div class="se-card" (click)="goToExpert(expert.id)" role="button" tabindex="0"
+               [attr.aria-label]="'Ver perfil de ' + (expert.first_name || '') + ' ' + (expert.last_name || '')">
+
+            <div class="se-card__banner"></div>
+
+            <div class="se-card__avatar-wrap">
+              @if (expert.avatar_url) {
+                <div class="se-card__avatar" [style.background-image]="'url(' + expert.avatar_url + ')'"></div>
+              } @else {
+                <div class="se-card__avatar se-card__avatar--initials">
+                  {{ (expert.first_name?.[0] || '') }}{{ (expert.last_name?.[0] || '') }}
+                </div>
+              }
+            </div>
+
+            @if (expert.availability_status === 'available') {
+              <div class="se-card__badge">DISPONÍVEL</div>
+            }
+
+            <div class="se-card__body">
+              <div class="se-card__name">{{ (expert.first_name || '') + ' ' + (expert.last_name || '') }}</div>
+              <div class="se-card__specialty">{{ expert.specialty || '–' }}</div>
+              <div class="se-card__meta">
+                @if (expert.location) {
+                  <span class="se-card__meta-item">
+                    <mat-icon>location_on</mat-icon> {{ expert.location }}
+                  </span>
+                }
+                @if (expert.hourly_rate) {
+                  <span class="se-card__meta-item se-card__meta-item--rate">
+                    <mat-icon>credit_card</mat-icon> R$ {{ expert.hourly_rate }}/h
+                  </span>
+                }
+              </div>
+              @if (expert.bio) {
+                <p class="se-card__bio">{{ expert.bio.slice(0, 100) }}{{ expert.bio.length > 100 ? '...' : '' }}</p>
+              }
+            </div>
+
+            <div class="se-card__footer">
+              <button mat-stroked-button (click)="$event.stopPropagation(); goToExpert(expert.id)">
+                Ver Perfil
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (searched() && !searching() && !error() && experts().length === 0) {
+      <div class="se-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>Nenhum perito encontrado</h3>
+        <p>Tente ajustar os filtros ou buscar por termos diferentes.</p>
+        <button mat-stroked-button (click)="selectSpecialty('')">Limpar filtros</button>
+      </div>
+    }
+
+  </main>
 </div>

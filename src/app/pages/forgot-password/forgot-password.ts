@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -21,7 +21,8 @@ import { RouterLink } from '@angular/router';
         RouterLink
     ],
     templateUrl: './forgot-password.html',
-    styleUrl: './forgot-password.scss'
+    styleUrl: './forgot-password.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPassword {
     resetForm: FormGroup;

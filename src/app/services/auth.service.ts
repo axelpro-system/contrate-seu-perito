@@ -4,59 +4,61 @@ import { Router } from '@angular/router';
 
 export interface UserProfile {
     id: string;
-    full_name: string;
-    role: 'client' | 'expert';
-    email: string;
-    // Add other profile fields as needed
+    first_name: string;
+    last_name: string;
+    role: string;
+    contact_email: string;
+    accountStatus?: string;
 }
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-    public isAuthenticated = signal(false);
+    public authenticated = signal(false);
     public userProfile = signal<UserProfile | null>(null);
     public isLoading = signal(true);
-
     private initializationPromise: Promise<void>;
 
-    constructor(
-        private supabaseService: SupabaseService,
-        private router: Router
-    ) {
+    constructor(private supabaseService: SupabaseService, private router: Router) {
         this.initializationPromise = this.initializeSession();
-
-        // Listen for auth state changes (e.g., login, logout, token refresh)
         this.supabaseService.client.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
-                this.isAuthenticated.set(true);
+                this.authenticated.set(true);
                 this.loadUserProfile(session.user.id);
             } else if (event === 'SIGNED_OUT') {
-                this.isAuthenticated.set(false);
+                this.authenticated.set(false);
                 this.userProfile.set(null);
                 this.router.navigate(['/login']);
             }
         });
     }
 
-    public get initialized(): Promise<void> {
-        return this.initializationPromise;
+    get initialized(): Promise<void> { return this.initializationPromise; }
+    isAuthenticated(): boolean { return this.authenticated(); }
+
+    async awaitProfile(): Promise<UserProfile> {
+        return new Promise((resolve) => {
+            const check = () => {
+                const profile = this.userProfile();
+                if (profile) resolve(profile);
+                else setTimeout(check, 50);
+            };
+            check();
+        });
     }
 
-    private async initializeSession(): Promise<void> {
+    private async initializeSession() {
         try {
             const { data: { session } } = await this.supabaseService.getSession();
-
             if (session) {
-                this.isAuthenticated.set(true);
+                this.authenticated.set(true);
                 await this.loadUserProfile(session.user.id);
             } else {
-                this.isAuthenticated.set(false);
+                this.authenticated.set(false);
                 this.userProfile.set(null);
             }
         } catch (error) {
             console.error('Error initializing session:', error);
-            this.isAuthenticated.set(false);
+            this.authenticated.set(false);
             this.userProfile.set(null);
         } finally {
             this.isLoading.set(false);
@@ -67,13 +69,14 @@ export class AuthService {
         try {
             const { data: profile, error } = await this.supabaseService.getProfile(userId);
             if (error) throw error;
-
             if (profile) {
                 this.userProfile.set({
                     id: profile.id,
-                    full_name: profile.full_name,
-                    role: profile.role,
-                    email: profile.email || '',
+                    first_name: profile.first_name || '',
+                    last_name: profile.last_name || '',
+                    role: profile.profile_type || 'CONTRATANTE',
+                    contact_email: profile.contact_email || '',
+                    accountStatus: profile.account_status || 'PENDING',
                 });
             }
         } catch (error) {
@@ -81,7 +84,17 @@ export class AuthService {
         }
     }
 
-    async logout() {
-        await this.supabaseService.signOut();
+    getRedirectUrl(): string {
+        const profile = this.userProfile();
+        if (!profile) return '/login';
+
+        if (profile.role === 'ADMIN') return '/admin';
+        if (profile.role === 'PERITO') {
+            if (profile.accountStatus === 'PENDING') return '/expert/onboarding';
+            return '/expert-dashboard';
+        }
+        return '/search';
     }
+
+    async logout() { await this.supabaseService.signOut(); }
 }

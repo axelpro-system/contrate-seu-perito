@@ -48,6 +48,10 @@
             max-width: 400px;
             padding: 40px;
 
+            @media (max-width: 480px) {
+                padding: 24px 16px;
+            }
+
             .form-header {
                 margin-bottom: 32px;
                 text-align: center;
@@ -57,6 +61,10 @@
                     font-weight: 600;
                     color: #333;
                     margin-bottom: 8px;
+
+                    @media (max-width: 480px) {
+                        font-size: 1.5rem;
+                    }
                 }
 
                 p {

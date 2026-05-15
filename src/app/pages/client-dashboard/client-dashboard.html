@@ -1,0 +1,132 @@
+<div class="cd-page">
+
+  <!-- Header -->
+  <div class="cd-header">
+    <div class="cd-header__inner">
+      <h1 class="cd-header__title">Minhas Cotações</h1>
+      <p class="cd-header__sub">Acompanhe suas solicitações e propostas de peritos</p>
+    </div>
+    <button mat-flat-button class="cd-header__btn" routerLink="/search">
+      <mat-icon>add</mat-icon>
+      Nova Cotação
+    </button>
+  </div>
+
+  <!-- Loading skeleton -->
+  @if (loading) {
+  <div class="cd-grid">
+    @for (_ of [1,2,3]; track _) {
+    <div class="cd-skeleton">
+      <div class="cd-skeleton__top">
+        <div class="cd-skeleton__line cd-skeleton__line--title"></div>
+        <div class="cd-skeleton__badge"></div>
+      </div>
+      <div class="cd-skeleton__line cd-skeleton__line--text"></div>
+      <div class="cd-skeleton__line cd-skeleton__line--short"></div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Empty state -->
+  @else if (quotes.length === 0) {
+  <div class="cd-empty">
+    <div class="cd-empty__icon"><mat-icon>inbox</mat-icon></div>
+    <h2>Nenhuma cotação enviada</h2>
+    <p>Busque peritos e solicite cotações para seu caso.</p>
+    <button mat-flat-button class="cd-empty__btn" routerLink="/search">
+      <mat-icon>search</mat-icon>
+      Buscar Peritos
+    </button>
+  </div>
+  }
+
+  <!-- Quotes list -->
+  @else {
+  <div class="cd-grid">
+    @for (q of quotes; track q.id) {
+    <div class="cd-card" [class.cd-card--proposal]="q.proposed_value">
+
+      <div class="cd-card__header">
+        <div class="cd-card__identity">
+          <div class="cd-card__avatar">{{ (q.requester_name || 'P')[0] | uppercase }}</div>
+          <div>
+            <h3 class="cd-card__name">{{ q.requester_name || 'Perito' }}</h3>
+            <span class="cd-card__date">{{ q.created_at | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+        <span class="cd-status"
+          [class.cd-status--pending]="q.status === 'submitted'"
+          [class.cd-status--review]="q.status === 'under_review'"
+          [class.cd-status--approved]="q.status === 'approved'"
+          [class.cd-status--rejected]="q.status === 'rejected'">
+          @switch (q.status) {
+            @case ('submitted')    { <mat-icon>schedule</mat-icon> Pendente }
+            @case ('under_review') { <mat-icon>visibility</mat-icon> Em Análise }
+            @case ('approved')     { <mat-icon>check_circle</mat-icon> Aceito }
+            @case ('rejected')     { <mat-icon>cancel</mat-icon> Recusado }
+            @default               { {{ q.status }} }
+          }
+        </span>
+      </div>
+
+      @if (q.case_description) {
+      <p class="cd-card__desc">{{ q.case_description }}</p>
+      }
+
+      <!-- Proposal -->
+      <div class="cd-card__actions">
+        <button mat-stroked-button class="cd-btn-chat" (click)="openChat(q)">
+          <mat-icon>chat</mat-icon> Chat
+        </button>
+      </div>
+
+      @if (q.proposed_value) {
+      <div class="cd-proposal">
+        <div class="cd-proposal__header">
+          <mat-icon>description</mat-icon>
+          Proposta do Perito
+        </div>
+        <div class="cd-proposal__body">
+          <div class="cd-proposal__item">
+            <span class="cd-proposal__label">Valor</span>
+            <span class="cd-proposal__value">R$ {{ q.proposed_value | number:'1.2-2' }}</span>
+          </div>
+          @if (q.proposed_deadline) {
+          <div class="cd-proposal__item">
+            <span class="cd-proposal__label">Prazo</span>
+            <span>{{ q.proposed_deadline }}</span>
+          </div>
+          }
+        </div>
+
+        @if (q.status === QuoteStatus.UNDER_REVIEW) {
+        <div class="cd-proposal__actions">
+          <button mat-flat-button class="cd-btn-accept" (click)="accept(q)" [disabled]="acting === q.id">
+            <mat-icon>check</mat-icon>
+            {{ acting === q.id ? 'Aceitando...' : 'Aceitar Proposta' }}
+          </button>
+          <button mat-stroked-button class="cd-btn-reject" (click)="reject(q)" [disabled]="acting === q.id">
+            <mat-icon>close</mat-icon>
+            Recusar
+          </button>
+        </div>
+        }
+
+        @if (q.status === QuoteStatus.APPROVED) {
+        <div class="cd-proposal__actions">
+          <button mat-flat-button class="cd-btn-review" (click)="openReview(q)">
+            <mat-icon>star_rate</mat-icon>
+            Avaliar Perito
+          </button>
+        </div>
+        }
+      </div>
+      }
+
+    </div>
+    }
+  </div>
+  }
+
+</div>

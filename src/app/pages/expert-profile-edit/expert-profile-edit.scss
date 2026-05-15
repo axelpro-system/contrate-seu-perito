@@ -1,57 +1,614 @@
-.edit-profile-container {
+// ══════════════════════════════════════════════════════════════
+//  Design tokens
+// ══════════════════════════════════════════════════════════════
+$navy:    #0d1b2a;
+$orange:  #f5a623;
+$primary: #1a237e;
+$bg:      #f4f5f8;
+$white:   #ffffff;
+$text:    #1a1a2e;
+$muted:   #6b7280;
+$border:  #e5e7eb;
+
+$footer-h:  68px;
+
+// ══════════════════════════════════════════════════════════════
+//  Host: full-page layout
+// ══════════════════════════════════════════════════════════════
+:host {
+  display: block;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Outer wrapper
+// ══════════════════════════════════════════════════════════════
+.ep-wrap {
+  display: block;
+  min-height: 100vh;
+}
+
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN content area
+// ══════════════════════════════════════════════════════════════
+.ep-main {
+  background: $bg;
+  padding: 32px 32px ($footer-h + 24px);
+  max-width: 860px;
+  margin: 0 auto;
+
+  @media (max-width: 600px) {
+    padding: 20px 16px ($footer-h + 16px);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Skeleton loading
+// ══════════════════════════════════════════════════════════════
+.ep-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__bar {
+    height: 20px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e0e4ee 25%, #eef0f6 50%, #e0e4ee 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+
+    &--wide   { width: 60%; }
+    &--medium { width: 40%; }
+  }
+
+  &__card {
+    height: 200px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #e0e4ee 25%, #eef0f6 50%, #e0e4ee 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Error state
+// ══════════════════════════════════════════════════════════════
+.ep-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  text-align: center;
+
+  &__icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #d32f2f;
+  }
+
+  &__msg {
+    color: $muted;
+    font-size: 15px;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Page header
+// ══════════════════════════════════════════════════════════════
+.ep-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  &__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: $text;
+    margin: 0;
+  }
+
+  &__view-btn {
+    font-size: 13px;
+    color: $primary;
+    border-color: rgba($primary, 0.4);
+    gap: 4px;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Visibility banner
+// ══════════════════════════════════════════════════════════════
+.ep-visibility-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 10px;
+  background: #e6f4ea;
+  color: #1e7e34;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+
+  &__left {
     display: flex;
+    align-items: center;
+    gap: 10px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #1e7e34;
+    }
+
+    strong { font-weight: 700; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Completion bar
+// ══════════════════════════════════════════════════════════════
+.ep-completion {
+  background: $white;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: $muted;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; color: $primary; }
+    strong { color: $primary; font-size: 16px; margin-left: auto; }
+  }
+
+  &__bar {
+    border-radius: 4px;
+    height: 8px;
+
+    // Angular Material progress bar colour override
+    ::ng-deep .mdc-linear-progress__bar-inner {
+      border-color: $primary;
+    }
+    ::ng-deep .mdc-linear-progress__buffer-bar {
+      background: rgba($primary, 0.12);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  White cards (sections)
+// ══════════════════════════════════════════════════════════════
+.ep-card {
+  background: $white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 12px;
+  }
+
+  &__title-icon {
+    color: $primary;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &__divider {
+    margin-bottom: 20px;
+    border-color: $border;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Avatar row
+// ══════════════════════════════════════════════════════════════
+.ep-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.ep-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid $primary;
+  background-size: cover;
+  background-position: center;
+  background-color: #c5cae9;
+  position: relative;
+  flex-shrink: 0;
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.78);
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    background-color: #f5f5f5;
-    min-height: calc(100vh - 64px); // Adjust based on navbar height
+  }
 }
 
-mat-card {
-    width: 100%;
-    max-width: 800px;
-    padding: 32px;
+.ep-avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__btn {
+    font-size: 13px;
+    color: $primary;
+    border-color: rgba($primary, 0.5);
+  }
+
+  &__remove {
+    font-size: 13px;
+    color: #d32f2f;
+    padding: 0;
+    line-height: 1.2;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: $muted;
+  }
 }
 
-mat-card-header {
-    margin-bottom: 32px;
+// ══════════════════════════════════════════════════════════════
+//  Two-column grid helpers
+// ══════════════════════════════════════════════════════════════
+.ep-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
 
-    mat-card-title {
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 8px;
+.ep-full {
+  width: 100%;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Qualifications two-column layout
+// ══════════════════════════════════════════════════════════════
+.ep-qual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.ep-qual-col {
+  &__heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 12px;
+
+    &--mt { margin-top: 20px; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Toggle list (specialty demand / work types)
+// ══════════════════════════════════════════════════════════════
+.ep-toggle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &__item {
+    padding: 9px 14px;
+    border-radius: 7px;
+    border: 1px solid $border;
+    font-size: 13px;
+    color: $text;
+    cursor: pointer;
+    transition: background 0.16s, color 0.16s, border-color 0.16s;
+    user-select: none;
+    line-height: 1.35;
+
+    &:hover {
+      background: rgba($navy, 0.05);
+      border-color: rgba($navy, 0.2);
     }
 
-    mat-card-subtitle {
-        font-size: 14px;
-        color: #666;
+    &--active {
+      background: $navy !important;
+      color: $white !important;
+      border-color: $navy !important;
+      font-weight: 600;
     }
+  }
 }
 
-.form-row {
-    margin-bottom: 16px;
+// ══════════════════════════════════════════════════════════════
+//  Certifications section
+// ══════════════════════════════════════════════════════════════
+.ep-cert-header {
+  margin-bottom: 16px;
 
-    &.two-col {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
+  &__btn {
+    font-size: 13px;
+    color: $primary;
+    border-color: rgba($primary, 0.4);
 
-        @media (max-width: 600px) {
-            grid-template-columns: 1fr;
-        }
-    }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
 }
 
-.full-width {
-    width: 100%;
+.ep-cert-add {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  &__select {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  &__year {
+    width: 80px;
+    height: 56px;
+    padding: 0 12px;
+    border: 1px solid rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+    font-size: 14px;
+    color: $text;
+    background: $white;
+    flex-shrink: 0;
+    outline: none;
+
+    &:focus { border-color: $primary; }
+
+    &::placeholder { color: $muted; }
+  }
+
+  &__fab {
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
 }
 
-.actions {
-    margin-top: 32px;
+.ep-cert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ep-cert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8f9fb;
+  border: 1px solid $border;
+  border-radius: 8px;
+
+  &__info {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 2px;
 
-    button {
-        min-width: 150px;
-        padding: 8px 24px;
+    strong { font-size: 14px; color: $text; font-weight: 600; }
+  }
+
+  &__date {
+    font-size: 12px;
+    color: $muted;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &--approved {
+      background: #e6f4ea;
+      color: #1e7e34;
     }
+
+    &--rejected {
+      background: #fdecea;
+      color: #c62828;
+    }
+  }
+}
+
+.ep-cert-empty {
+  font-size: 14px;
+  color: $muted;
+  padding: 16px 0;
+  text-align: center;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CV bar
+// ══════════════════════════════════════════════════════════════
+.ep-cv-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: $navy;
+  border-radius: 10px;
+  color: $white;
+
+  &__icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &--empty { color: rgba(255, 255, 255, 0.45); font-weight: 400; }
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__upload-btn {
+    color: $white !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    font-size: 13px;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+
+  &__view-btn {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 13px;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STICKY FOOTER
+// ══════════════════════════════════════════════════════════════
+.ep-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: $footer-h;
+  background: $white;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 100;
+
+  &__cancel {
+    color: $muted;
+    border-color: $border;
+    font-size: 14px;
+  }
+
+  &__save {
+    background: $primary !important;
+    color: $white !important;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 28px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-spinner { --mdc-circular-progress-active-indicator-color: #fff; }
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Material form field overrides (inside cards)
+// ══════════════════════════════════════════════════════════════
+.ep-card {
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Responsive
+// ══════════════════════════════════════════════════════════════
+@media (max-width: 900px) {
+  .ep-qual-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ep-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .ep-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ep-cv-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+
+    &__actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
 }

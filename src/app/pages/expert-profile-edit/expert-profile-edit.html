@@ -1,67 +1,470 @@
-<div class="edit-profile-container">
-    <mat-card>
-        <mat-card-header>
-            <mat-card-title>Editar Perfil Profissional</mat-card-title>
-            <mat-card-subtitle>Mantenha seus dados atualizados para atrair mais clientes</mat-card-subtitle>
-        </mat-card-header>
+<div class="ep-wrap">
 
-        <mat-card-content>
-            <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Nome Completo</mat-label>
-                        <input matInput formControlName="full_name" placeholder="Seu nome">
-                    </mat-form-field>
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════════════════════════ -->
+  <main class="ep-main">
+
+    @if (loading()) {
+      <div class="ep-skeleton">
+        <div class="ep-skeleton__bar ep-skeleton__bar--wide"></div>
+        <div class="ep-skeleton__bar ep-skeleton__bar--medium"></div>
+        <div class="ep-skeleton__card"></div>
+        <div class="ep-skeleton__card"></div>
+      </div>
+    }
+
+    @if (!loading() && error()) {
+      <div class="ep-error">
+        <mat-icon class="ep-error__icon">error_outline</mat-icon>
+        <p class="ep-error__msg">{{ error() }}</p>
+        <button mat-raised-button color="primary" routerLink="/login">Ir para Login</button>
+      </div>
+    }
+
+    @if (!loading() && !error()) {
+
+      <!-- Page header -->
+      <div class="ep-page-header">
+        <h1 class="ep-page-header__title">Meu Perfil Profissional</h1>
+        <a mat-stroked-button class="ep-page-header__view-btn" [routerLink]="['/expert', userId]">
+          <mat-icon>open_in_new</mat-icon>
+          Ver Perfil Público
+        </a>
+      </div>
+
+      <!-- Visibility banner -->
+      <div class="ep-visibility-banner">
+        <div class="ep-visibility-banner__left">
+          <mat-icon>visibility</mat-icon>
+          <span>
+            @if (profileForm.get('profile_visible')?.value) {
+              Seu perfil está <strong>visível</strong> para contratantes.
+            } @else {
+              Seu perfil está <strong>oculto</strong> dos resultados de busca.
+            }
+          </span>
+        </div>
+        <mat-slide-toggle
+          formGroupDisabled
+          [checked]="profileForm.get('profile_visible')?.value"
+          (change)="profileForm.get('profile_visible')?.setValue($event.checked)"
+          color="primary">
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Completion bar -->
+      <div class="ep-completion">
+        <div class="ep-completion__label">
+          <mat-icon>bar_chart</mat-icon>
+          <span>Completude do Perfil</span>
+          <strong>{{ profileCompletion() }}%</strong>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="profileCompletion()"
+          class="ep-completion__bar">
+        </mat-progress-bar>
+      </div>
+
+      <!-- FORM -->
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" id="profile-form">
+
+        <!-- ── 1. Informações Pessoais ─────────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Informações Pessoais
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-avatar-row">
+            <div class="ep-avatar" [style.background-image]="avatarBg()">
+              @if (uploadingAvatar()) {
+                <div class="ep-avatar__overlay">
+                  <mat-spinner diameter="28"></mat-spinner>
                 </div>
+              }
+            </div>
+            <div class="ep-avatar-actions">
+              <input
+                type="file"
+                accept="image/*"
+                id="avatarUpload"
+                hidden
+                #avatarInput
+                (change)="onAvatarSelected($event)">
+              <button
+                mat-stroked-button
+                type="button"
+                class="ep-avatar-actions__btn"
+                (click)="avatarInput.click()"
+                [disabled]="uploadingAvatar()">
+                <mat-icon>photo_camera</mat-icon> Mudar Foto
+              </button>
+              <button
+                mat-button
+                type="button"
+                class="ep-avatar-actions__remove"
+                (click)="removeAvatar()"
+                [disabled]="!avatarUrl() && !avatarPreview()">
+                Remover
+              </button>
+              <span class="ep-avatar-actions__hint">JPG, PNG — máx. 2MB</span>
+            </div>
+          </div>
 
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Especialidade</mat-label>
-                        <input matInput formControlName="specialty"
-                            placeholder="Ex: Engenharia Civil, Medicina do Trabalho">
-                    </mat-form-field>
+          <div class="ep-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Primeiro Nome</mat-label>
+              <input matInput formControlName="first_name" placeholder="João">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Sobrenome</mat-label>
+              <input matInput formControlName="last_name" placeholder="Silva">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="ep-full">
+            <mat-label>Especialidade Principal</mat-label>
+            <mat-select formControlName="specialty">
+              @for (sp of SPECIALTIES; track sp) {
+                <mat-option [value]="sp">{{ sp }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </section>
+
+        <!-- ── 2. Disponibilidade e Valores ───────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Disponibilidade e Valores
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Status de Disponibilidade</mat-label>
+              <mat-select formControlName="availability_status">
+                <mat-option value="available">Disponível para projetos</mat-option>
+                <mat-option value="busy">Ocupado / Pouca disponibilidade</mat-option>
+                <mat-option value="unavailable">Indisponível no momento</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Valor / Hora (R$)</mat-label>
+              <input matInput type="number" formControlName="hourly_rate" placeholder="0,00">
+              <span matTextPrefix>R$&nbsp;</span>
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- ── 3. Sobre Mim e Localização ─────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Sobre Mim e Localização
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="state">
+                @for (uf of STATES; track uf) {
+                  <mat-option [value]="uf">{{ uf }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Cidade</mat-label>
+              <input matInput formControlName="city" placeholder="São Paulo">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="ep-full">
+            <mat-label>Biografia</mat-label>
+            <textarea
+              matInput
+              formControlName="bio"
+              rows="5"
+              placeholder="Descreva sua experiência, atuação e diferenciais...">
+            </textarea>
+            <mat-hint>Descreva seu histórico profissional e especialização.</mat-hint>
+          </mat-form-field>
+        </section>
+
+        <!-- ── 4. Qualificações ───────────────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Qualificações
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-qual-grid">
+            <!-- Left column -->
+            <div class="ep-qual-col">
+              <h3 class="ep-qual-col__heading">Áreas de Expertise</h3>
+              <mat-form-field appearance="outline" class="ep-full">
+                <mat-label>Adicionar área</mat-label>
+                <mat-chip-grid #tagGrid aria-label="Áreas de expertise">
+                  @for (tag of tags(); track tag) {
+                    <mat-chip-row (removed)="removeTag(tag)">
+                      {{ tag }}
+                      <button matChipRemove [attr.aria-label]="'remover ' + tag">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-row>
+                  }
+                  <input
+                    placeholder="Ex: Direito Bancário"
+                    [matChipInputFor]="tagGrid"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    (matChipInputTokenEnd)="addTag($event)">
+                </mat-chip-grid>
+                <mat-hint>{{ tags().length }}/10 — pressione Enter para adicionar</mat-hint>
+              </mat-form-field>
+
+              <h3 class="ep-qual-col__heading ep-qual-col__heading--mt">Especialidades em Demanda</h3>
+              <ul class="ep-toggle-list">
+                @for (item of SPECIALTY_DEMAND; track item) {
+                  <li
+                    class="ep-toggle-list__item"
+                    [class.ep-toggle-list__item--active]="isSpecialtySelected(item)"
+                    (click)="toggleSpecialty(item)"
+                    role="button"
+                    [attr.aria-pressed]="isSpecialtySelected(item)">
+                    {{ item }}
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <!-- Right column -->
+            <div class="ep-qual-col">
+              <h3 class="ep-qual-col__heading">Certificações e Credenciais</h3>
+              <mat-form-field appearance="outline" class="ep-full">
+                <mat-label>Adicionar credencial</mat-label>
+                <mat-chip-grid #credGrid aria-label="Credenciais">
+                  @for (cred of credentialTags(); track cred) {
+                    <mat-chip-row (removed)="removeCredential(cred)">
+                      {{ cred }}
+                      <button matChipRemove [attr.aria-label]="'remover ' + cred">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-row>
+                  }
+                  <input
+                    placeholder="Ex: CRC-SP"
+                    [matChipInputFor]="credGrid"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    (matChipInputTokenEnd)="addCredential($event)">
+                </mat-chip-grid>
+              </mat-form-field>
+
+              <h3 class="ep-qual-col__heading ep-qual-col__heading--mt">Tipo de Trabalho</h3>
+              <ul class="ep-toggle-list">
+                @for (item of WORK_TYPES; track item) {
+                  <li
+                    class="ep-toggle-list__item"
+                    [class.ep-toggle-list__item--active]="isWorkTypeSelected(item)"
+                    (click)="toggleWorkType(item)"
+                    role="button"
+                    [attr.aria-pressed]="isWorkTypeSelected(item)">
+                    {{ item }}
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── 5. Certificados Verificados ────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Certificados Verificados
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-cert-header">
+            <button mat-stroked-button type="button" class="ep-cert-header__btn">
+              <mat-icon>verified</mat-icon>
+              Solicitar Verificação
+            </button>
+          </div>
+
+          <div class="ep-cert-add">
+            <mat-form-field appearance="outline" class="ep-cert-add__select">
+              <mat-label>Selecione a Certificação</mat-label>
+              <mat-select #certNameSelect>
+                @for (group of CERTIFICATION_OPTIONS; track group.group) {
+                  <mat-optgroup [label]="group.group">
+                    @for (cert of group.items; track cert) {
+                      <mat-option [value]="cert">{{ cert }}</mat-option>
+                    }
+                  </mat-optgroup>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <input #certDate class="ep-cert-add__year" placeholder="Ano">
+
+            <button
+              mat-mini-fab
+              color="primary"
+              type="button"
+              class="ep-cert-add__fab"
+              [disabled]="!certNameSelect.value"
+              (click)="addCertification(certNameSelect.value, '', certDate.value); certNameSelect.value = ''; certDate.value = ''">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <ul class="ep-cert-list">
+            @for (cert of certifications(); track $index) {
+              <li class="ep-cert-item">
+                <div class="ep-cert-item__info">
+                  <strong>{{ cert.name }}</strong>
+                  @if (cert.date) {
+                    <span class="ep-cert-item__date">{{ cert.date }}</span>
+                  }
                 </div>
-
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Biografia / Sobre Mim</mat-label>
-                        <textarea matInput formControlName="bio" rows="5"
-                            placeholder="Descreva sua experiência e qualificações..."></textarea>
-                        <mat-hint align="end">{{profileForm.get('bio')?.value?.length || 0}} caracteres</mat-hint>
-                    </mat-form-field>
+                <div class="ep-cert-item__right">
+                  <span class="ep-cert-item__badge ep-cert-item__badge--approved">Aprovado</span>
+                  <button mat-icon-button type="button" color="warn" (click)="removeCertification($index)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
+              </li>
+            }
+            @if (certifications().length === 0) {
+              <li class="ep-cert-empty">Nenhuma certificação adicionada.</li>
+            }
+          </ul>
+        </section>
 
-                <div class="form-row two-col">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Telefone / WhatsApp</mat-label>
-                        <input matInput formControlName="phone" placeholder="(00) 00000-0000">
-                    </mat-form-field>
+        <!-- ── 6. Contato e Redes Sociais ─────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Contato e Redes Sociais
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Valor Hora (R$)</mat-label>
-                        <input matInput type="number" formControlName="hourly_rate" placeholder="0.00">
-                        <span matTextPrefix>R$&nbsp;</span>
-                    </mat-form-field>
-                </div>
+          <div class="ep-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>E-mail de Contato</mat-label>
+              <input matInput formControlName="email" placeholder="email@exemplo.com">
+              <mat-icon matSuffix>email</mat-icon>
+            </mat-form-field>
 
-                <div class="form-row two-col">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Cidade</mat-label>
-                        <input matInput formControlName="city">
-                    </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Telefone / WhatsApp</mat-label>
+              <input matInput formControlName="phone" placeholder="(11) 99999-9999">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Estado</mat-label>
-                        <input matInput formControlName="state" placeholder="UF">
-                    </mat-form-field>
-                </div>
+            <mat-form-field appearance="outline">
+              <mat-label>LinkedIn</mat-label>
+              <input matInput formControlName="social_linkedin" placeholder="https://linkedin.com/in/...">
+              <mat-icon matSuffix>link</mat-icon>
+            </mat-form-field>
 
-                <div class="actions">
-                    <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid || loading">
-                        {{ loading ? 'Salvando...' : 'Salvar Alterações' }}
-                    </button>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
-</div>
+            <mat-form-field appearance="outline">
+              <mat-label>Website / Portfólio</mat-label>
+              <input matInput formControlName="social_website" placeholder="https://seusite.com.br">
+              <mat-icon matSuffix>language</mat-icon>
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- ── 7. Currículo (CV) ───────────────────────────────── -->
+        <section class="ep-card">
+          <h2 class="ep-card__title">
+            <mat-icon class="ep-card__title-icon">check_circle</mat-icon>
+            Currículo (CV)
+          </h2>
+          <mat-divider class="ep-card__divider"></mat-divider>
+
+          <div class="ep-cv-bar">
+            <mat-icon class="ep-cv-bar__icon">description</mat-icon>
+            <div class="ep-cv-bar__info">
+              @if (cvFileName()) {
+                <span class="ep-cv-bar__name">{{ cvFileName() }}</span>
+                @if (uploadingCv()) {
+                  <span class="ep-cv-bar__uploading">Enviando...</span>
+                }
+              } @else {
+                <span class="ep-cv-bar__name ep-cv-bar__name--empty">Nenhum arquivo enviado</span>
+              }
+              <span class="ep-cv-bar__hint">PDF, DOC, DOCX — máx. 5MB</span>
+            </div>
+            <div class="ep-cv-bar__actions">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                id="cvUpload"
+                hidden
+                #cvFileInput
+                (change)="onCvSelected($event)">
+              <button mat-stroked-button type="button" class="ep-cv-bar__upload-btn" (click)="cvFileInput.click()" [disabled]="uploadingCv()">
+                <mat-icon>cloud_upload</mat-icon> Enviar CV
+              </button>
+              @if (cvFileName() || profileForm.get('cv_url')?.value) {
+                <a
+                  mat-button
+                  class="ep-cv-bar__view-btn"
+                  [href]="profileForm.get('cv_url')?.value"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  <mat-icon>visibility</mat-icon> Visualizar
+                </a>
+                <button mat-button color="warn" (click)="removeCv()">
+                  <mat-icon>delete</mat-icon> Remover
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+
+      </form><!-- end form -->
+
+    }<!-- end @if -->
+  </main><!-- end ep-main -->
+</div><!-- end ep-wrap -->
+
+<!-- ══════════════════════════════════════════════════════════
+     STICKY FOOTER  (outside form so it is always rendered)
+══════════════════════════════════════════════════════════ -->
+@if (!loading() && !error()) {
+  <div class="ep-footer">
+    <button
+      mat-stroked-button
+      type="button"
+      class="ep-footer__cancel"
+      routerLink="/expert-dashboard">
+      Cancelar
+    </button>
+
+    <button
+      mat-raised-button
+      type="submit"
+      form="profile-form"
+      class="ep-footer__save"
+      [disabled]="profileForm.invalid || saving()">
+      @if (saving()) {
+        <mat-spinner diameter="18"></mat-spinner>
+        Salvando...
+      } @else {
+        <ng-container>
+          <mat-icon>save</mat-icon>
+          Salvar Alterações
+        </ng-container>
+      }
+    </button>
+  </div>
+}
