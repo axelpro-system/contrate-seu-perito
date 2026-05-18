@@ -3,9 +3,13 @@
 
     <div class="card-content-wrapper">
         <div class="avatar-section">
-            <div class="avatar-placeholder">
-                {{ expert?.name?.charAt(0) || '?' }}
-            </div>
+            @if (expert?.avatarUrl) {
+                <img [src]="expert.avatarUrl" class="avatar-img" loading="lazy" alt="Foto de {{ expert.name }}">
+            } @else {
+                <div class="avatar-placeholder">
+                    {{ expert?.name?.charAt(0) || '?' }}
+                </div>
+            }
             <button class="fav-btn" (click)="favSvc.toggle(expert.id); $event.stopPropagation()" [class.fav-active]="favSvc.isFavorite(expert.id)" aria-label="Favoritar">
                 <mat-icon>{{ favSvc.isFavorite(expert.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
             </button>

@@ -105,6 +105,11 @@
             <mat-icon aria-hidden="true">handshake</mat-icon>
             Contratar
           </button>
+          <button mat-stroked-button class="pp-btn-outline" (click)="openAppointmentDialog()"
+                  [disabled]="!currentUserId()" matTooltip="Agende uma consulta">
+            <mat-icon aria-hidden="true">calendar_today</mat-icon>
+            Agendar
+          </button>
           <button mat-stroked-button class="pp-btn-outline" (click)="openReviewDialog()" [disabled]="!currentUserId()">
             <mat-icon aria-hidden="true">star_rate</mat-icon>
             Avaliar
@@ -276,6 +281,11 @@
           <button mat-flat-button class="pp-btn-primary pp-contact__cta" (click)="openHireDialog()" [disabled]="!currentUserId()">
             <mat-icon aria-hidden="true">handshake</mat-icon>
             Solicitar Orçamento
+          </button>
+          <button mat-stroked-button class="pp-btn-outline pp-contact__cta" (click)="openAppointmentDialog()"
+                  [disabled]="!currentUserId()" matTooltip="Agende uma consulta">
+            <mat-icon aria-hidden="true">calendar_today</mat-icon>
+            Agendar Consulta
           </button>
           @if (!currentUserId()) {
           <p class="pp-contact__login-hint">

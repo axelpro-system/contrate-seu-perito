@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npx ng *)",
+      "WebFetch(domain:www.catho.com.br)",
+      "mcp__playwright__browser_close",
+      "Bash(rm -f catho-home.jpeg perito-home.jpeg perito-full.jpeg hero-new.jpeg hero-fixed.jpeg final-full.jpeg)",
+      "Bash(rm -rf .playwright-mcp)",
+      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match '\\\\''ng serve --port 4321'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }')",
+      "Bash(ls *.jpeg)"
+    ]
+  }
+}

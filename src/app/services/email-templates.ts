@@ -1,4 +1,4 @@
-export const APP_NAME = 'Contrate seu Perito'
+export const APP_NAME = 'Contrate um Perito'
 export const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://axelpro.com.br'
 export const PRIMARY_COLOR = '#007AFF'
 export const BG_COLOR = '#F8F9FA'

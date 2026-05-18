@@ -109,7 +109,7 @@ export class AdminPendingExperts implements OnInit {
                         expertName: `${expert.first_name || ''} ${expert.last_name || ''}`.trim(),
                         dashboardUrl: `${window.location.origin}/expert-dashboard`,
                     }),
-                    'Contrate seu Perito - Aprovação'
+                    'Contrate um Perito - Aprovação'
                 );
                 
                 if (!emailResult.success) {

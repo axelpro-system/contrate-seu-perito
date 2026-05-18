@@ -32,8 +32,44 @@ export class SupabaseService {
         return this.supabase.auth.signInWithPassword({ email, password });
     }
 
-    signUp(email: string, password: string, data: any = {}) {
-        return this.supabase.auth.signUp({ email, password, options: { data } });
+    async signUp(email: string, password: string, metadata: any = {}) {
+        const { data, error } = await this.supabase.auth.signUp({
+            email,
+            password,
+            options: { data: metadata }
+        });
+
+        if (error) {
+            console.error('Auth signUp error:', error);
+            return { data, error };
+        }
+
+        // Fallback: cria perfil manualmente caso o trigger do banco falhe
+        const userId = data?.user?.id;
+        if (userId) {
+            try {
+                const { error: profileError } = await this.supabase
+                    .from('profiles')
+                    .upsert({
+                        id: userId,
+                        email: email,
+                        first_name: metadata.full_name?.split(' ')[0] || '',
+                        last_name: metadata.full_name?.split(' ').slice(1).join(' ') || '',
+                        profile_type: metadata.profile_type || 'CONTRATANTE',
+                        profile_visible: metadata.profile_visible ?? true,
+                        account_status: 'ACTIVE',
+                    }, { onConflict: 'id' });
+
+                if (profileError) {
+                    console.error('Profile creation fallback error:', profileError);
+                    // Não falha o cadastro se o perfil não for criado — o trigger pode já ter feito isso
+                }
+            } catch (profileErr) {
+                console.error('Unexpected profile creation error:', profileErr);
+            }
+        }
+
+        return { data, error };
     }
 
     signOut() { return this.supabase.auth.signOut(); }
@@ -67,7 +103,78 @@ export class SupabaseService {
     searchExperts(filters: { name?: string; specialty?: string; location?: string; minRating?: number; maxRate?: number; orderBy?: string }) {
         let query = this.supabase.from('profiles').select('*').eq('profile_type', 'PERITO').eq('profile_visible', true).eq('account_status', 'ACTIVE');
         if (filters.name) query = query.or(`first_name.ilike.%${filters.name}%,last_name.ilike.%${filters.name}%`);
-        if (filters.specialty) query = query.ilike('specialty', `%${filters.specialty}%`);
+        
+        if (filters.specialty) {
+            const specLower = filters.specialty.toLowerCase().trim();
+            if (specLower === 'contabilidade') {
+                query = query.or(
+                    'specialty.ilike.%contabilidade%,' +
+                    'specialty.ilike.%contador%,' +
+                    'specialty.ilike.%contabil%,' +
+                    'specialty.ilike.%bancaria%,' +
+                    'specialty.ilike.%economista%,' +
+                    'specialty.ilike.%tributaria%,' +
+                    'specialty.ilike.%haveres%,' +
+                    'specialty.ilike.%lucros%,' +
+                    'specialty.ilike.%expurgos%,' +
+                    'specialty.ilike.%trabalhista%,' +
+                    'specialty.ilike.%trabalho%,' +
+                    'tags.cs.{"contabilidade"},' +
+                    'tags.cs.{"contador"},' +
+                    'tags.cs.{"bancária"},' +
+                    'tags.cs.{"tributária"},' +
+                    'tags.cs.{"trabalhista"}'
+                );
+            } else if (specLower === 'medicina' || specLower === 'medicina do trabalho' || specLower === 'perícia médica') {
+                query = query.or(
+                    'specialty.ilike.%medicina%,' +
+                    'specialty.ilike.%medico%,' +
+                    'specialty.ilike.%medica%,' +
+                    'specialty.ilike.%saude%,' +
+                    'specialty.ilike.%ortopedia%,' +
+                    'specialty.ilike.%psiquiatria%,' +
+                    'tags.cs.{"medicina"},' +
+                    'tags.cs.{"médico"},' +
+                    'tags.cs.{"saúde"}'
+                );
+            } else if (specLower === 'engenharia civil') {
+                query = query.or(
+                    'specialty.ilike.%civil%,' +
+                    'specialty.ilike.%engenheiro%,' +
+                    'specialty.ilike.%engenharia%,' +
+                    'specialty.ilike.%estrutural%,' +
+                    'specialty.ilike.%patologia%,' +
+                    'tags.cs.{"engenharia"},' +
+                    'tags.cs.{"civil"},' +
+                    'tags.cs.{"engenheiro"}'
+                );
+            } else if (specLower === 'grafotécnica') {
+                query = query.or(
+                    'specialty.ilike.%grafotecnica%,' +
+                    'specialty.ilike.%grafotecnico%,' +
+                    'specialty.ilike.%documentoscopia%,' +
+                    'specialty.ilike.%caligrafia%,' +
+                    'specialty.ilike.%escrita%,' +
+                    'tags.cs.{"grafotécnica"},' +
+                    'tags.cs.{"grafotécnico"}'
+                );
+            } else if (specLower === 'ambiental' || specLower === 'perícia ambiental') {
+                query = query.or(
+                    'specialty.ilike.%ambiental%,' +
+                    'specialty.ilike.%meio ambiente%,' +
+                    'specialty.ilike.%biologo%,' +
+                    'specialty.ilike.%agronomo%,' +
+                    'specialty.ilike.%agronomia%,' +
+                    'specialty.ilike.%florestal%,' +
+                    'tags.cs.{"ambiental"},' +
+                    'tags.cs.{"meio ambiente"}'
+                );
+            } else {
+                const spec = `%${filters.specialty}%`;
+                query = query.or(`specialty.ilike.${spec},tags.cs.{"${filters.specialty}"}`);
+            }
+        }
+        
         if (filters.location) {
             const loc = `%${filters.location}%`;
             query = query.or(`city.ilike.${loc},state.ilike.${loc}`);
@@ -116,13 +223,24 @@ export class SupabaseService {
         });
     }
 
-    createReview(data: { expert_id: string; client_id: string; rating: number; comment: string; lead_id?: string }) {
+    async createReview(data: { expert_id: string; client_id: string; rating: number; comment: string; lead_id?: string }) {
+        let reviewerName = 'Cliente';
+        try {
+            const { data: profile } = await this.getProfile(data.client_id);
+            if (profile) {
+                reviewerName = profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Cliente';
+            }
+        } catch (err) {
+            console.error('Error fetching reviewer name:', err);
+        }
+
         return this.supabase.from('reviews').insert({
             expert_id: data.expert_id,
             client_id: data.client_id,
             rating: data.rating,
             comment: data.comment,
             lead_id: data.lead_id ?? null,
+            reviewer_name: reviewerName
         });
     }
 
@@ -173,6 +291,14 @@ export class SupabaseService {
 
     upsertProfile(data: any) {
         return this.supabase.from('profiles').upsert(this.sanitizeProfileData(data), { onConflict: 'id' });
+    }
+
+    getActiveExpertsForCounts() {
+        return this.supabase.from('profiles')
+            .select('specialty, tags, city, state')
+            .eq('profile_type', 'PERITO')
+            .eq('profile_visible', true)
+            .eq('account_status', 'ACTIVE');
     }
 
     async sendNotificationEmail(to: string, subject: string, html: string, fromName?: string): Promise<{ success: boolean; error?: string; code?: string }> {

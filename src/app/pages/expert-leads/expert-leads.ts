@@ -225,7 +225,7 @@ export class RespondQuoteDialog {
                     notes: this.notes || '—',
                     dashboardUrl: `${window.location.origin}/client-dashboard`,
                 }),
-                'Contrate seu Perito - Proposta'
+                'Contrate um Perito - Proposta'
             );
             
             if (!emailResult.success) {

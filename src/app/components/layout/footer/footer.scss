@@ -94,6 +94,14 @@
                 }
             }
 
+            .logo-icon-img {
+                width: 44px;
+                height: 44px;
+                object-fit: contain;
+                border-radius: 10px;
+                display: block;
+            }
+
             .logo-text {
                 font-size: 1.25rem;
                 font-weight: 800;
