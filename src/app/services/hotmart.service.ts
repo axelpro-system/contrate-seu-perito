@@ -20,8 +20,9 @@ export class HotmartService {
             redirect_uri: redirectUri,
             response_type: 'code',
             state: state,
+            scope: 'all',
         });
-        return `https://api-sec-vlc.hotmart.com/security/oauth/login?${params.toString()}`;
+        return `https://api-sec-vlc.hotmart.com/security/oauth/authorize?${params.toString()}`;
     }
 
     validateState(incomingState: string | null): boolean {
