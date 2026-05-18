@@ -249,7 +249,11 @@ export class AdminUsers implements OnInit, OnDestroy {
             this.notify.success(`${name} excluído com sucesso.`);
         } catch (err: any) {
             console.error('Error deleting user:', err);
-            const msg = err?.message || err?.error_description || err?.details || 'Erro ao excluir usuário';
+            let msg = 'Erro ao excluir usuário';
+            try {
+                const body = await err?.context?.json?.();
+                msg = body?.error || body?.message || msg;
+            } catch {}
             this.notify.error(msg);
         } finally {
             this.cdr.detectChanges();

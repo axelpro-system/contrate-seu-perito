@@ -52,17 +52,17 @@ export class SupabaseService {
                     .from('profiles')
                     .upsert({
                         id: userId,
-                        email: email,
+                        contact_email: email,
                         first_name: metadata.full_name?.split(' ')[0] || '',
                         last_name: metadata.full_name?.split(' ').slice(1).join(' ') || '',
+                        full_name: metadata.full_name || null,
                         profile_type: metadata.profile_type || 'CONTRATANTE',
-                        profile_visible: metadata.profile_visible ?? true,
-                        account_status: 'ACTIVE',
+                        profile_visible: metadata.profile_visible ?? false,
+                        account_status: 'PENDING',
                     }, { onConflict: 'id' });
 
                 if (profileError) {
                     console.error('Profile creation fallback error:', profileError);
-                    // Não falha o cadastro se o perfil não for criado — o trigger pode já ter feito isso
                 }
             } catch (profileErr) {
                 console.error('Unexpected profile creation error:', profileErr);
@@ -309,7 +309,12 @@ export class SupabaseService {
             
             if (error) {
                 console.error('Email notification error:', error);
-                return { success: false, error: error.message || 'Erro ao enviar email' };
+                let errMsg = error.message || 'Erro ao enviar email';
+                try {
+                    const body = await (error as any).context?.json?.();
+                    if (body?.error) errMsg = body.error;
+                } catch {}
+                return { success: false, error: errMsg };
             }
             
             if (data && !data.success) {

@@ -124,8 +124,9 @@ export class AdminPendingExperts implements OnInit {
                         'Cadastro aprovado!', 'Seu perfil de perito foi aprovado. Acesse seu painel.');
                 }
             }
-        } catch {
-            this.notify.error('Erro ao aprovar perito.');
+        } catch (err: any) {
+            console.error('Erro ao aprovar perito:', err);
+            this.notify.error(err?.message || 'Erro ao aprovar perito.');
         } finally {
             this.acting = null;
             this.cdr.detectChanges();
