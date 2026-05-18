@@ -6,15 +6,16 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
     standalone: true,
-    imports: [CommonModule, RouterModule, MatSidenavModule, MatListModule, MatIconModule, MatButtonModule, MatToolbarModule],
+    imports: [CommonModule, RouterModule, MatSidenavModule, MatListModule, MatIconModule, MatButtonModule, MatToolbarModule, MatDividerModule],
     template: `
     <mat-toolbar color="primary">
       <button mat-icon-button (click)="drawer.toggle()"><mat-icon>menu</mat-icon></button>
-      <span style="flex:1;">Admin — Contrate seu Perito</span>
+      <span style="flex:1;">Admin — Contrate um Perito</span>
       <button mat-icon-button (click)="logout()"><mat-icon>exit_to_app</mat-icon></button>
     </mat-toolbar>
     <mat-sidenav-container style="height:calc(100vh - 64px);">
@@ -29,11 +30,36 @@ import { AuthService } from '../../services/auth.service';
           <a mat-list-item routerLink="/admin/specialties" routerLinkActive="active-link">
             <mat-icon matListItemIcon>category</mat-icon> Especialidades
           </a>
+          <a mat-list-item routerLink="/admin/tickets" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>support</mat-icon> Tickets
+          </a>
           <a mat-list-item routerLink="/admin/logs" routerLinkActive="active-link">
             <mat-icon matListItemIcon>history</mat-icon> Logs
           </a>
           <a mat-list-item routerLink="/admin/pending-experts" routerLinkActive="active-link">
             <mat-icon matListItemIcon>pending</mat-icon> Peritos Pendentes
+          </a>
+          <a mat-list-item routerLink="/admin/content-pages" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>article</mat-icon> Páginas
+          </a>
+          <a mat-list-item routerLink="/admin/broadcast" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>campaign</mat-icon> Notificar
+          </a>
+          <a mat-list-item routerLink="/admin/moderation" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>gavel</mat-icon> Moderação
+          </a>
+          <a mat-list-item routerLink="/admin/email-templates" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>mail_outline</mat-icon> Email Templates
+          </a>
+          <mat-divider></mat-divider>
+          <a mat-list-item routerLink="/admin/finance" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>account_balance</mat-icon> Financeiro
+          </a>
+          <a mat-list-item routerLink="/admin/monitoring" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>monitor_heart</mat-icon> Monitoramento
+          </a>
+          <a mat-list-item routerLink="/admin/reports" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>assessment</mat-icon> Relatórios
           </a>
         </mat-nav-list>
       </mat-sidenav>

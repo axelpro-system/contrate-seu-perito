@@ -5,7 +5,7 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const FROM_EMAIL = 'naoresponder@axelpro.com.br'
-const FROM_NAME = 'Contrate seu Perito'
+const FROM_NAME = 'Contrate um Perito'
 
 // CORS headers for all responses
 const CORS_HEADERS = {

@@ -8,11 +8,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
+import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
+import type { AppNotification } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, RouterLink, RouterLinkActive, TimeAgoPipe],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,5 +65,26 @@ export class Header implements OnInit {
     const confirmed = window.confirm('Tem certeza que deseja sair?');
     if (!confirmed) return;
     await this.auth.logout();
+  }
+
+  async openNotification(n: AppNotification) {
+    if (!n.read) {
+      await this.notifSvc.markAsRead(n.id);
+    }
+    switch (n.type) {
+      case 'new_quote':
+      case 'quote_response':
+      case 'new_message':
+      case 'appointment_scheduled':
+      case 'appointment_cancelled':
+      case 'appointment_confirmed':
+      case 'appointment_completed':
+        if (this.isExpert) this.router.navigate(['/expert-dashboard']);
+        else this.router.navigate(['/client-dashboard']);
+        break;
+      case 'expert_approved':
+        this.router.navigate(['/expert-dashboard']);
+        break;
+    }
   }
 }

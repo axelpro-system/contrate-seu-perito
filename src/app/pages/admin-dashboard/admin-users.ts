@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -9,19 +9,25 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { SupabaseService } from '../../services/supabase.service';
 import { NotificationService } from '../../services/notification.service';
+import { ExportService } from '../../services/export.service';
 
 @Component({
     standalone: true,
     imports: [CommonModule, FormsModule, MatTableModule, MatButtonModule, MatIconModule, MatSlideToggleModule,
-        MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, MatSelectModule, RouterModule],
+        MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatTooltipModule, RouterModule],
     template: `
     <div class="admin-page">
       <div class="header-row">
         <h1>Usuários</h1>
         <span class="count">{{ filteredUsers().length }} usuário{{ filteredUsers().length !== 1 ? 's' : '' }}</span>
+        <button mat-raised-button color="primary" routerLink="/admin/users/new" class="new-btn">
+          <mat-icon>person_add</mat-icon> Novo Usuário
+        </button>
       </div>
 
       <div class="filters-bar">
@@ -47,6 +53,9 @@ import { NotificationService } from '../../services/notification.service';
             <mat-option value="false">Oculto</mat-option>
           </mat-select>
         </mat-form-field>
+        <button mat-stroked-button (click)="exportFiltered()" class="export-btn" matTooltip="Exportar filtrados">
+          <mat-icon>file_download</mat-icon> Exportar
+        </button>
       </div>
 
       @if (loading) {
@@ -76,6 +85,7 @@ import { NotificationService } from '../../services/notification.service';
               <th mat-header-cell *matHeaderCellDef>Ações</th>
               <td mat-cell *matCellDef="let u">
                 <button mat-icon-button [routerLink]="['/admin/users', u.id, 'edit']" matTooltip="Editar"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button (click)="deleteUser(u)" matTooltip="Excluir" color="warn"><mat-icon>delete</mat-icon></button>
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="columns"></tr>
@@ -109,12 +119,16 @@ import { NotificationService } from '../../services/notification.service';
     .type-badge.admin { background:#FEE2E2; color:#DC2626; }
     .empty { text-align:center; padding:60px 20px; }
     .empty mat-icon { font-size:48px; width:48px; height:48px; color:#D1D5DB; margin-bottom:12px; }
-    .empty p { color:#9CA3AF; }`],
+    .empty p { color:#9CA3AF; }
+    .new-btn { margin-left:auto; }
+    .export-btn { align-self:center; }
+    .delete-btn-cell { color:#DC2626; }`],
 
 })
-export class AdminUsers implements OnInit {
+export class AdminUsers implements OnInit, OnDestroy {
     private supabase = inject(SupabaseService);
     private notify = inject(NotificationService);
+    private exportSvc = inject(ExportService);
     private cdr = inject(ChangeDetectorRef);
     loading = true;
     users = signal<any[]>([]);
@@ -122,6 +136,7 @@ export class AdminUsers implements OnInit {
     searchQuery = signal('');
     filterType = signal('');
     filterVisible = signal('');
+    private channel: any = null;
 
     filteredUsers = computed(() => {
         let list = this.users();
@@ -150,6 +165,34 @@ export class AdminUsers implements OnInit {
 
     ngOnInit() {
         setTimeout(() => this.loadUsers(), 0);
+        this.subscribeRealtime();
+    }
+
+    ngOnDestroy() {
+        if (this.channel) {
+            this.supabase.client.removeChannel(this.channel);
+        }
+    }
+
+    private subscribeRealtime() {
+        this.channel = this.supabase.client.channel('admin-users')
+            .on('postgres_changes' as any,
+                { event: '*', schema: 'public', table: 'profiles' },
+                (payload: RealtimePostgresChangesPayload<any>) => {
+                    const event = payload.eventType;
+                    const record = payload.new;
+                    const oldId = (payload.old as any)?.id;
+
+                    if (event === 'INSERT' && record) {
+                        this.users.update(list => [record, ...list]);
+                    } else if (event === 'UPDATE' && record) {
+                        this.users.update(list => list.map(u => u.id === record.id ? { ...u, ...record } : u));
+                    } else if (event === 'DELETE' && oldId) {
+                        this.users.update(list => list.filter(u => u.id !== oldId));
+                    }
+                    this.cdr.detectChanges();
+                })
+            .subscribe();
     }
 
     async loadUsers() {
@@ -190,5 +233,57 @@ export class AdminUsers implements OnInit {
         } finally {
             this.cdr.detectChanges();
         }
+    }
+
+    async deleteUser(user: any) {
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.contact_email || user.email || 'este usuário';
+        const confirmed = window.confirm(`Tem certeza que deseja excluir permanentemente ${name}?\n\nIsso removerá o usuário de auth e todos os dados associados.`);
+        if (!confirmed) return;
+
+        try {
+            const { error } = await this.supabase.client.functions.invoke('delete-user', {
+                body: { userId: user.id }
+            });
+            if (error) throw error;
+            this.users.update(list => list.filter(u => u.id !== user.id));
+            this.notify.success(`${name} excluído com sucesso.`);
+        } catch (err: any) {
+            console.error('Error deleting user:', err);
+            const msg = err?.message || err?.error_description || err?.details || 'Erro ao excluir usuário';
+            this.notify.error(msg);
+        } finally {
+            this.cdr.detectChanges();
+        }
+    }
+
+    exportFiltered() {
+        const data = this.filteredUsers();
+        if (data.length === 0) {
+            this.notify.info('Nenhum usuário para exportar.');
+            return;
+        }
+
+        const header = 'Nome,Email,Tipo,Status,Visível,Cidade,Estado,Última Atualização';
+        const rows = data.map((u: any) => {
+            const name = `"${(u.full_name || `${u.first_name || ''} ${u.last_name || ''}`).replace(/"/g, '""')}"`;
+            const email = `"${(u.contact_email || u.email || '').replace(/"/g, '""')}"`;
+            const type = this.profileLabel(u.profile_type);
+            const status = u.account_status || '';
+            const vis = u.profile_visible ? 'Sim' : 'Não';
+            const city = `"${(u.city || '').replace(/"/g, '""')}"`;
+            const state = `"${(u.state || '').replace(/"/g, '""')}"`;
+            const updated = u.updated_at ? new Date(u.updated_at).toLocaleString('pt-BR') : '';
+            return `${name},${email},${type},${status},${vis},${city},${state},${updated}`;
+        }).join('\n');
+
+        const csv = '\uFEFF' + header + '\n' + rows;
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `usuarios_filtrados_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.notify.success(`Exportados ${data.length} usuários.`);
     }
 }

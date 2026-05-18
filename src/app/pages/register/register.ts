@@ -50,13 +50,24 @@ export class Register {
                 profile_type: ProfileType.CONTRATANTE,
                 profile_visible: true,
             };
-            const { error } = await this.supabaseService.signUp(email, password, sanitized);
-            if (error) throw error;
+            const { data, error } = await this.supabaseService.signUp(email, password, sanitized);
+            if (error) {
+                console.error('SignUp error details:', error);
+                throw error;
+            }
+
+            if (data?.user?.identities?.length === 0) {
+                this.snackBar.open('Este email já está cadastrado.', 'Fechar', { duration: 5000 });
+                this.submitting = false;
+                return;
+            }
 
             this.snackBar.open('Cadastro realizado! Verifique seu email para confirmar.', 'Fechar', { duration: 5000 });
             this.router.navigate(['/login']);
         } catch (error: any) {
-            this.snackBar.open(error.message || 'Erro ao cadastrar', 'Fechar', { duration: 3000 });
+            const msg = error?.message || error?.error_description || 'Erro ao cadastrar. Tente novamente.';
+            this.snackBar.open(msg, 'Fechar', { duration: 5000 });
+            console.error('Registration error:', error);
         } finally {
             this.submitting = false;
         }

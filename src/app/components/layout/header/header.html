@@ -47,6 +47,9 @@
         <a mat-button routerLink="/client-requests" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
             Pedidos
         </a>
+        <a mat-button routerLink="/my-appointments" routerLinkActive="active-link" class="nav-btn nav-btn--ghost">
+            Agendamentos
+        </a>
         }
 
         @if (isAdmin) {
@@ -55,33 +58,40 @@
         </a>
         }
 
-        <button mat-icon-button class="notif-btn" [matMenuTriggerFor]="notifMenu" (click)="notifSvc.markAllAsRead()">
-            <mat-icon [class.notif-has]="notifSvc.unreadCount() > 0" aria-hidden="true">{{ notifSvc.unreadCount() > 0 ? 'notifications_active' : 'notifications' }}</mat-icon>
+        <button mat-icon-button class="notif-bell" [class.has-unread]="notifSvc.unreadCount() > 0"
+                [matMenuTriggerFor]="notifMenu" (click)="closeMobileMenu()">
+            <mat-icon>notifications</mat-icon>
             @if (notifSvc.unreadCount() > 0) {
-            <span class="notif-badge">{{ notifSvc.unreadCount() }}</span>
+            <span class="notif-badge">{{ notifSvc.unreadCount() > 99 ? '99+' : notifSvc.unreadCount() }}</span>
             }
         </button>
-        <mat-menu #notifMenu="matMenu" class="notif-menu">
+        <mat-menu #notifMenu="matMenu" class="notif-menu" yPosition="below" [overlapTrigger]="false">
+            <div class="notif-header">
+                <strong>Notificações</strong>
+                @if (notifSvc.unreadCount() > 0) {
+                <button mat-button (click)="notifSvc.markAllAsRead()">Marcar todas como lidas</button>
+                }
+            </div>
+            <mat-divider />
             @if (notifSvc.notifications().length === 0) {
-            <button mat-menu-item disabled style="color:#9CA3AF;font-size:0.85rem;text-align:center;pointer-events:none;">
-                Nenhuma notificação
-            </button>
-            } @else {
+            <div class="notif-empty">
+                <mat-icon>notifications_none</mat-icon>
+                <p>Nenhuma notificação</p>
+            </div>
+            }
             @for (n of notifSvc.notifications().slice(0, 10); track n.id) {
-            <button mat-menu-item (click)="notifSvc.markAsRead(n.id)" [class.notif-unread]="!n.read">
-                <div class="notif-item">
-                    <span class="notif-title">{{ n.title }}</span>
-                    @if (n.body) { <span class="notif-body">{{ n.body }}</span> }
-                    <span class="notif-time">{{ n.created_at | date:'dd/MM HH:mm' }}</span>
+            <button mat-menu-item class="notif-item" [class.unread]="!n.read" (click)="openNotification(n)">
+                <div class="notif-item-content">
+                    <div class="notif-title">{{ n.title }}</div>
+                    @if (n.body) { <div class="notif-body">{{ n.body }}</div> }
+                    <div class="notif-time">{{ n.created_at | timeAgo }}</div>
                 </div>
+                @if (!n.read) { <span class="unread-dot"></span> }
             </button>
             }
             @if (notifSvc.notifications().length > 10) {
-            <mat-divider></mat-divider>
-            <button mat-menu-item disabled style="color:#9CA3AF;font-size:0.8rem;text-align:center;">
-                + {{ notifSvc.notifications().length - 10 }} mais
-            </button>
-            }
+            <mat-divider />
+            <div class="notif-footer">+ {{ notifSvc.notifications().length - 10 }} mais</div>
             }
         </mat-menu>
 
@@ -95,6 +105,7 @@
             @if (isExpert) { <button mat-menu-item routerLink="/expert/edit">Editar Perfil</button> }
             @if (isExpert) { <button mat-menu-item routerLink="/expert/quotes">Leads Recebidos</button> }
             @if (isClient) { <button mat-menu-item routerLink="/client-dashboard">Minhas Cotações</button> }
+            @if (isClient) { <button mat-menu-item routerLink="/my-appointments">Meus Agendamentos</button> }
             <button mat-menu-item routerLink="/search">Buscar Peritos</button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="logout()">
@@ -157,6 +168,9 @@
     </a>
     <a mat-button routerLink="/client-requests" (click)="closeMobileMenu()">
         <mat-icon aria-hidden="true">send</mat-icon> Meus Pedidos
+    </a>
+    <a mat-button routerLink="/my-appointments" (click)="closeMobileMenu()">
+        <mat-icon aria-hidden="true">calendar_today</mat-icon> Meus Agendamentos
     </a>
     }
 

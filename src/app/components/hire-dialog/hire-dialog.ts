@@ -122,7 +122,7 @@ export class HireDialog {
                 caseDescription: this.hireForm.value.caseDescription,
                 expertQuotesUrl: `${window.location.origin}/expert/quotes`,
               }),
-              'Contrate seu Perito - Nova Cotação'
+              'Contrate um Perito - Nova Cotação'
             );
             
             if (!emailResult.success) {

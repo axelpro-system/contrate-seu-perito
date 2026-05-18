@@ -91,6 +91,7 @@ export interface Review {
     client_id: string;
     rating: number;
     comment: string | null;
+    reviewer_name: string;
     lead_id: string | null;
     created_at: string;
 }
@@ -131,4 +132,65 @@ export interface ContactSubmission {
     subject: string;
     message: string;
     created_at: string;
+}
+
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TicketStatus = 'open' | 'in_progress' | 'waiting_client' | 'resolved' | 'closed';
+
+export const TICKET_PRIORITY_LABELS: Record<TicketPriority, string> = {
+    low: 'Baixa', medium: 'Média', high: 'Alta', urgent: 'Urgente',
+};
+
+export const TICKET_STATUS_LABELS: Record<TicketStatus, string> = {
+    open: 'Aberto', in_progress: 'Em Andamento', waiting_client: 'Aguardando Cliente',
+    resolved: 'Resolvido', closed: 'Fechado',
+};
+
+export interface SupportTicket {
+    id: string;
+    user_id: string | null;
+    subject: string;
+    description: string;
+    priority: TicketPriority;
+    status: TicketStatus;
+    assigned_to: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TicketMessage {
+    id: string;
+    ticket_id: string;
+    sender_id: string | null;
+    message: string;
+    is_internal: boolean;
+    created_at: string;
+}
+
+export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+
+export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
+    pending: 'Pendente',
+    confirmed: 'Confirmado',
+    completed: 'Realizado',
+    cancelled: 'Cancelado',
+    no_show: 'Não Compareceu',
+};
+
+export interface Appointment {
+    id: string;
+    quote_id: string | null;
+    expert_id: string;
+    client_id: string;
+    appointment_date: string;
+    start_time: string;
+    end_time: string;
+    status: AppointmentStatus;
+    notes: string | null;
+    cancelled_by: string | null;
+    cancellation_reason: string | null;
+    created_at: string;
+    updated_at: string;
+    expert?: { full_name?: string; avatar_url?: string; specialty?: string };
+    client?: { full_name?: string };
 }

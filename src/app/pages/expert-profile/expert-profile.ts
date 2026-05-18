@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, inject, signal, computed, ChangeD
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
@@ -11,13 +12,14 @@ import { SupabaseService } from '../../services/supabase.service';
 import { ExpertServiceService, ExpertService, PRICE_UNIT_LABELS } from '../../services/expert-service.service';
 import { HireDialog } from '../../components/hire-dialog/hire-dialog';
 import { ReviewDialog } from '../../components/review-dialog/review-dialog';
+import { AppointmentDialog } from '../../components/appointment-dialog/appointment-dialog';
 
 @Component({
   selector: 'app-expert-profile',
   standalone: true,
   imports: [
     CommonModule, MatButtonModule, MatCardModule, MatIconModule,
-    MatDividerModule, RouterLink, MatDialogModule, MatChipsModule
+    MatDividerModule, RouterLink, MatDialogModule, MatChipsModule, MatTooltipModule
   ],
   templateUrl: './expert-profile.html',
   styleUrl: './expert-profile.scss',
@@ -107,6 +109,21 @@ export class ExpertProfile implements OnInit {
   private async loadReviews(id: string) {
     const { data } = await this.supabaseService.getReviewsForExpert(id);
     this.reviews.set(data || []);
+  }
+
+  openAppointmentDialog() {
+    const expertData = this.expert();
+    const userId = this.currentUserId();
+    if (!expertData) return;
+    if (!userId) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: `/expert/${expertData.id}` } });
+      return;
+    }
+    const expertName = expertData.full_name || `${expertData.first_name || ''} ${expertData.last_name || ''}`.trim();
+    this.dialog.open(AppointmentDialog, {
+      width: '500px',
+      data: { expertId: expertData.id, expertName, clientId: userId }
+    });
   }
 
   openHireDialog() {
