@@ -63,7 +63,7 @@ export class RegisterExpert {
             }
 
             this.snackBar.open('Cadastro realizado! Verifique seu e-mail para ativar a conta.', 'Fechar', { duration: 5000 });
-            this.router.navigate(['/email-confirmation']);
+            this.router.navigate(['/register-expert/success']);
         } catch (error: any) {
             const msg = error?.message || error?.error_description || 'Erro ao cadastrar. Tente novamente.';
             this.snackBar.open(msg, 'Fechar', { duration: 5000 });

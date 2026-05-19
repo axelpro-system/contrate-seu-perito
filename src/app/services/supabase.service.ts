@@ -416,4 +416,189 @@ export class SupabaseService {
             profile_visible: false,
         }).eq('id', expertId);
     }
+
+    // Check if email exists in auth.users
+    async checkEmailExists(email: string): Promise<boolean> {
+        try {
+            const { data, error } = await this.supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .maybeSingle();
+            
+            if (error) {
+                console.error('Error checking email:', error);
+                return false;
+            }
+            
+            return !!data;
+        } catch (err) {
+            console.error('Exception checking email:', err);
+            return false;
+        }
+    }
+
+    // List all auth users (admin only)
+    async listAuthUsers(): Promise<{ success: boolean; users?: any[]; error?: string }> {
+        try {
+            const { data, error } = await this.supabase.functions.invoke('list-users', {
+                body: {}
+            });
+            
+            if (error) {
+                console.error('List users error:', error);
+                return { success: false, error: error.message };
+            }
+            
+            return { success: true, users: data.users };
+        } catch (err: any) {
+            console.error('Exception listing users:', err);
+            return { success: false, error: err.message };
+        }
+    }
+
+    // Delete user by ID (admin only)
+    async deleteUser(userId: string): Promise<{ success: boolean; error?: string }> {
+        try {
+            const { data, error } = await this.supabase.functions.invoke('delete-user', {
+                body: { userId }
+            });
+            
+            if (error) {
+                console.error('Delete user error:', error);
+                return { success: false, error: error.message };
+            }
+            
+            return { success: true };
+        } catch (err: any) {
+            console.error('Exception deleting user:', err);
+            return { success: false, error: err.message };
+        }
+    }
+
+    // ============================================
+    // EXPERT REGISTRATION LOGS
+    // ============================================
+
+    // Get registration logs for an expert
+    async getExpertRegistrationLogs(expertId: string) {
+        return this.supabase
+            .from('expert_registration_logs')
+            .select(`
+                *,
+                changed_by:changed_by(id, first_name, last_name, full_name)
+            `)
+            .eq('expert_id', expertId)
+            .order('created_at', { ascending: false });
+    }
+
+    // Submit expert registration (update status to 'submitted')
+    async submitExpertRegistration(expertId: string) {
+        return this.supabase
+            .from('profiles')
+            .update({
+                registration_status: 'submitted',
+                registration_submitted_at: new Date().toISOString(),
+                account_status: 'PENDING',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', expertId)
+            .eq('profile_type', 'PERITO');
+    }
+
+    // Review expert registration (admin only)
+    async reviewExpertRegistration(
+        expertId: string, 
+        approved: boolean, 
+        reason?: string
+    ) {
+        try {
+            const { data, error } = await this.supabase.rpc('review_expert_registration', {
+                p_expert_id: expertId,
+                p_approved: approved,
+                p_reason: reason || null
+            });
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (err: any) {
+            console.error('Error reviewing expert registration:', err);
+            return { success: false, error: err.message };
+        }
+    }
+
+    // Get pending registrations (admin view)
+    async getPendingRegistrations() {
+        return this.supabase
+            .from('pending_registrations_view')
+            .select('*');
+    }
+
+    // Get expert registration status
+    async getExpertRegistrationStatus(expertId: string) {
+        return this.supabase
+            .from('profiles')
+            .select('registration_status, registration_submitted_at, registration_reviewed_at, registration_reviewed_by, registration_rejection_reason')
+            .eq('id', expertId)
+            .single();
+    }
+
+    // Update registration notes
+    async updateRegistrationNotes(expertId: string, notes: string) {
+        return this.supabase
+            .from('profiles')
+            .update({
+                registration_notes: notes,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', expertId);
+    }
+
+    // Send status update notification email to expert
+    async sendStatusUpdateNotification(
+        expertId: string,
+        oldStatus: string,
+        newStatus: string,
+        reason?: string
+    ): Promise<{ success: boolean; emailSent?: boolean; error?: string }> {
+        try {
+            const { data, error } = await this.supabase.functions.invoke('send-status-update', {
+                body: {
+                    expertId,
+                    oldStatus,
+                    newStatus,
+                    reason,
+                    sendEmail: true
+                }
+            });
+
+            if (error) {
+                console.error('Error sending status update notification:', error);
+                return { success: false, error: error.message };
+            }
+
+            return {
+                success: true,
+                emailSent: data?.emailSent || false
+            };
+        } catch (err: any) {
+            console.error('Exception sending status update notification:', err);
+            return { success: false, error: err.message };
+        }
+    }
+
+    // Get latest registration change for notification
+    async getLatestRegistrationChange(expertId: string) {
+        try {
+            const { data, error } = await this.supabase.rpc('get_latest_registration_change', {
+                p_expert_id: expertId
+            });
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (err: any) {
+            console.error('Error getting latest registration change:', err);
+            return { success: false, error: err.message };
+        }
+    }
 }

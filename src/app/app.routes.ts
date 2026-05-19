@@ -35,6 +35,7 @@ export const routes: Routes = [
     { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
     { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword) },
     { path: 'register-expert', loadComponent: () => import('./pages/register-expert/register-expert').then(m => m.RegisterExpert) },
+    { path: 'register-expert/success', loadComponent: () => import('./pages/registration-success/registration-success').then(m => m.RegistrationSuccess) },
     { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.Register) },
     { path: 'search', loadComponent: () => import('./pages/search-experts/search-experts').then(m => m.SearchExperts) },
     { path: 'auth/callback', loadComponent: () => import('./pages/auth-callback/auth-callback').then(m => m.AuthCallback) },

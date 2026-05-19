@@ -11,6 +11,8 @@ const CORS_HEADERS = {
 }
 
 serve(async (req) => {
+  console.log('Delete user function invoked')
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS })
   }
@@ -21,8 +23,10 @@ serve(async (req) => {
 
   try {
     const { userId } = await req.json()
+    console.log('Received userId:', userId)
 
     if (!userId) {
+      console.error('Missing userId')
       return new Response(JSON.stringify({ error: 'userId é obrigatório' }), {
         status: 400, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
       })
@@ -32,6 +36,8 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
+    console.log('Starting cleanup of related tables...')
+    
     const orderedTables = [
       { name: 'service_completions', columns: ['expert_id', 'client_id'] },
       { name: 'messages', columns: ['sender_id'] },
@@ -48,6 +54,7 @@ serve(async (req) => {
 
     for (const { name, columns } of orderedTables) {
       for (const column of columns) {
+        console.log(`Cleaning ${name}.${column} for user ${userId}`)
         const { error } = await supabase.from(name).delete().eq(column, userId)
         if (error && error.code !== 'PGRST116' && error.code !== '42P01') {
           console.warn(`Cleanup ${name}.${column}:`, error.message)
@@ -55,13 +62,18 @@ serve(async (req) => {
       }
     }
 
+    console.log('Deleting profile...')
     const { error: profileError } = await supabase.from('profiles').delete().eq('id', userId)
     if (profileError) {
-      console.warn('Profile delete:', profileError)
+      console.warn('Profile delete error:', profileError)
+    } else {
+      console.log('Profile deleted successfully')
     }
 
+    console.log('Checking if user exists in auth...')
     const { data: users, error: listError } = await supabase.auth.admin.listUsers()
     if (listError) {
+      console.error('listUsers error:', listError)
       return new Response(JSON.stringify({ error: `listUsers failed: ${listError.message}` }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
       })
@@ -69,19 +81,23 @@ serve(async (req) => {
 
     const found = users.users.find(u => u.id === userId)
     if (!found) {
+      console.log('User not found in auth (already deleted)')
       return new Response(JSON.stringify({ success: true, note: 'user already deleted' }), {
         status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
       })
     }
 
+    console.log('User found in auth, deleting...')
     const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
 
     if (deleteError) {
+      console.error('Delete user error:', deleteError)
       return new Response(JSON.stringify({ error: deleteError.message }), {
         status: 400, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
       })
     }
 
+    console.log('User deleted successfully from auth')
     return new Response(JSON.stringify({ success: true }), {
       status: 200, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     })
