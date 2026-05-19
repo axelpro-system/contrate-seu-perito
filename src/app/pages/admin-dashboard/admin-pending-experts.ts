@@ -6,6 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 import { NotificationService } from '../../services/notification.service';
 import { approvalEmail } from '../../services/email-templates';
@@ -13,7 +16,18 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
     standalone: true,
-    imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatChipsModule, MatDialogModule],
+    imports: [
+        CommonModule, 
+        MatTableModule, 
+        MatButtonModule, 
+        MatIconModule, 
+        MatProgressSpinnerModule, 
+        MatChipsModule, 
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule
+    ],
     template: `
     <div class="admin-page">
       <h1>Peritos Pendentes</h1>
@@ -41,18 +55,29 @@ import { AuthService } from '../../services/auth.service';
             <th mat-header-cell *matHeaderCellDef>Especialidade</th>
             <td mat-cell *matCellDef="let e">{{ e.specialty || '-' }}</td>
           </ng-container>
-          <ng-container matColumnDef="created_at">
-            <th mat-header-cell *matHeaderCellDef>Data Cadastro</th>
-            <td mat-cell *matCellDef="let e">{{ e.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+          <ng-container matColumnDef="registration_status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let e">
+              <span class="status-badge" [class]="e.registration_status">
+                {{ getStatusLabel(e.registration_status) }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="submitted_at">
+            <th mat-header-cell *matHeaderCellDef>Data Envio</th>
+            <td mat-cell *matCellDef="let e">{{ e.registration_submitted_at | date:'dd/MM/yyyy HH:mm' }}</td>
           </ng-container>
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Ações</th>
             <td mat-cell *matCellDef="let e">
-              <button mat-icon-button color="primary" (click)="approve(e)" [disabled]="acting === e.id" matTooltip="Aprovar">
+              <button mat-icon-button color="primary" (click)="openApproveDialog(e)" [disabled]="acting === e.id" matTooltip="Aprovar">
                 <mat-icon>check</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="reject(e)" [disabled]="acting === e.id" matTooltip="Rejeitar">
+              <button mat-icon-button color="warn" (click)="openRejectDialog(e)" [disabled]="acting === e.id" matTooltip="Rejeitar">
                 <mat-icon>close</mat-icon>
+              </button>
+              <button mat-icon-button (click)="viewLogs(e)" [disabled]="acting === e.id" matTooltip="Ver histórico">
+                <mat-icon>history</mat-icon>
               </button>
             </td>
           </ng-container>
@@ -62,7 +87,28 @@ import { AuthService } from '../../services/auth.service';
       }
     </div>
   `,
-    styles: [`.full-width { width:100%; } h1 { margin-bottom:8px; }.subtitle{color:#666;margin-bottom:24px;}.loading{display:flex;justify-content:center;padding:40px;}.empty-state{text-align:center;padding:60px;}.empty-state mat-icon{font-size:64px;width:64px;height:64px;color:#4caf50;margin-bottom:16px;}`],
+    styles: [`
+        .full-width { width:100%; } 
+        h1 { margin-bottom:8px; }
+        .subtitle{color:#666;margin-bottom:24px;}
+        .loading{display:flex;justify-content:center;padding:40px;}
+        .empty-state{text-align:center;padding:60px;}
+        .empty-state mat-icon{font-size:64px;width:64px;height:64px;color:#4caf50;margin-bottom:16px;}
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.submitted { background: #fff3e0; color: #e65100; }
+        .status-badge.under_review { background: #e3f2fd; color: #1565c0; }
+        .status-badge.approved { background: #e8f5e9; color: #2e7d32; }
+        .status-badge.rejected { background: #ffebee; color: #c62828; }
+        .status-badge.draft { background: #f5f5f5; color: #616161; }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminPendingExperts implements OnInit {
@@ -72,7 +118,7 @@ export class AdminPendingExperts implements OnInit {
     private dialog = inject(MatDialog);
     private cdr = inject(ChangeDetectorRef);
     experts: any[] = [];
-    columns = ['name', 'email', 'specialty', 'created_at', 'actions'];
+    columns = ['name', 'email', 'specialty', 'registration_status', 'submitted_at', 'actions'];
     loading = false;
     acting: string | null = null;
 
@@ -83,9 +129,12 @@ export class AdminPendingExperts implements OnInit {
     private async loadPendingExperts() {
         this.loading = true;
         try {
-            const { data } = await this.supabase.getPendingExperts();
+            // Usar a nova view de pendências
+            const { data, error } = await this.supabase.getPendingRegistrations();
+            if (error) throw error;
             this.experts = data ?? [];
-        } catch {
+        } catch (err: any) {
+            console.error('Erro ao carregar peritos pendentes:', err);
             this.notify.error('Erro ao carregar peritos pendentes.');
         } finally {
             this.loading = false;
@@ -93,14 +142,61 @@ export class AdminPendingExperts implements OnInit {
         }
     }
 
-    async approve(expert: any) {
+    getStatusLabel(status: string): string {
+        const labels: { [key: string]: string } = {
+            'draft': 'Rascunho',
+            'submitted': 'Pendente',
+            'under_review': 'Em Revisão',
+            'approved': 'Aprovado',
+            'rejected': 'Rejeitado'
+        };
+        return labels[status] || status;
+    }
+
+    openApproveDialog(expert: any) {
+        const reason = window.prompt('Adicionar nota sobre a aprovação (opcional):');
+        if (reason !== null) { // null = cancelado
+            this.approve(expert, reason || undefined);
+        }
+    }
+
+    openRejectDialog(expert: any) {
+        const reason = window.prompt('Motivo da rejeição (obrigatório):');
+        if (reason) {
+            this.reject(expert, reason);
+        } else if (reason === '') {
+            this.notify.error('Motivo da rejeição é obrigatório');
+        }
+    }
+
+    async approve(expert: any, notes?: string) {
         this.acting = expert.id;
         try {
-            const profile = this.auth.userProfile();
-            await this.supabase.approveExpert(expert.id, profile?.id || '');
+            // Usar a nova função RPC
+            const result = await this.supabase.reviewExpertRegistration(expert.id, true, notes);
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
             this.notify.success(`${expert.first_name} aprovado com sucesso!`);
             this.experts = this.experts.filter(e => e.id !== expert.id);
 
+            // Enviar notificação de atualização de status
+            const statusResult = await this.supabase.sendStatusUpdateNotification(
+                expert.id,
+                'under_review',
+                'approved',
+                notes
+            );
+
+            if (!statusResult.success) {
+                console.error('Falha ao enviar notificação de status:', statusResult.error);
+            } else if (statusResult.emailSent) {
+                this.notify.info('Email de atualização de status enviado ao perito.');
+            }
+
+            // Também enviar email de aprovação tradicional
             if (expert.contact_email) {
                 const emailResult = await this.supabase.sendNotificationEmail(
                     expert.contact_email,
@@ -133,17 +229,65 @@ export class AdminPendingExperts implements OnInit {
         }
     }
 
-    async reject(expert: any) {
+    async reject(expert: any, reason: string) {
         this.acting = expert.id;
         try {
-            await this.supabase.rejectExpert(expert.id);
+            // Usar a nova função RPC
+            const result = await this.supabase.reviewExpertRegistration(expert.id, false, reason);
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
             this.notify.success(`${expert.first_name} rejeitado.`);
             this.experts = this.experts.filter(e => e.id !== expert.id);
-        } catch {
-            this.notify.error('Erro ao rejeitar perito.');
+
+            // Enviar notificação de atualização de status
+            const statusResult = await this.supabase.sendStatusUpdateNotification(
+                expert.id,
+                'under_review',
+                'rejected',
+                reason
+            );
+
+            if (!statusResult.success) {
+                console.error('Falha ao enviar notificação de status:', statusResult.error);
+            } else if (statusResult.emailSent) {
+                this.notify.info('Email de atualização de status enviado ao perito.');
+            }
+        } catch (err: any) {
+            console.error('Erro ao rejeitar perito:', err);
+            this.notify.error(err?.message || 'Erro ao rejeitar perito.');
         } finally {
             this.acting = null;
             this.cdr.detectChanges();
+        }
+    }
+
+    async viewLogs(expert: any) {
+        try {
+            const { data, error } = await this.supabase.getExpertRegistrationLogs(expert.id);
+            if (error) throw error;
+            
+            // Formatar logs para exibição
+            const logs = data || [];
+            let message = `Histórico de ${expert.first_name} ${expert.last_name}:\n\n`;
+            
+            logs.forEach((log: any, index: number) => {
+                const date = new Date(log.created_at).toLocaleString('pt-BR');
+                const from = log.status_from || 'início';
+                const to = log.status_to;
+                message += `${index + 1}. ${date}\n   ${from} → ${to}\n   ${log.reason || ''}\n\n`;
+            });
+            
+            if (logs.length === 0) {
+                message += 'Nenhum registro encontrado.';
+            }
+            
+            alert(message); // Substitua por um modal bonito depois
+        } catch (err) {
+            console.error('Erro ao carregar logs:', err);
+            this.notify.error('Erro ao carregar histórico');
         }
     }
 }

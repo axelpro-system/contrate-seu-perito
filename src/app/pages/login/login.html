@@ -36,6 +36,37 @@
                     }
                 </mat-form-field>
 
+                <!-- Failed attempts warning -->
+                @if (failedAttempts > 0 && failedAttempts < 3) {
+                <div class="attempts-warning">
+                    <mat-icon>warning</mat-icon>
+                    <span>Tentativa {{ failedAttempts }} de 3. {{ 3 - failedAttempts }} tentativas restantes.</span>
+                </div>
+                }
+
+                <!-- Forgot Password Link - Show after 3 failed attempts -->
+                @if (showForgotPassword) {
+                <div class="forgot-password-section">
+                    <div class="forgot-password-alert">
+                        <mat-icon>lock_reset</mat-icon>
+                        <div class="alert-content">
+                            <p><strong>Esqueceu sua senha?</strong></p>
+                            <p>Clique no botão abaixo para receber um email de recuperação.</p>
+                        </div>
+                    </div>
+                    <button 
+                        mat-stroked-button 
+                        color="accent" 
+                        type="button" 
+                        (click)="sendPasswordReset()"
+                        [disabled]="sendingReset || !loginForm.get('email')?.value"
+                        class="forgot-password-btn">
+                        <mat-icon>{{ sendingReset ? 'hourglass_empty' : 'email' }}</mat-icon>
+                        {{ sendingReset ? 'Enviando...' : 'Enviar Email de Recuperação' }}
+                    </button>
+                </div>
+                }
+
                 <div class="actions">
                     <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || loading"
                         class="submit-btn">

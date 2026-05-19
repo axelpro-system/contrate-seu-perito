@@ -1,0 +1,103 @@
+<div class="success-container">
+    <!-- Header -->
+    <header class="header">
+        <img 
+            alt="Logo Contrate seu Perito" 
+            class="logo" 
+            src="https://lh3.googleusercontent.com/aida/ADBb0ugLyDQsZvO39yfXpN_MdoxXcYAtZPIw3MD1BllWCRaQvLXuxRHBdIJLVamqXKHORBYNwjDbgeE-XGpcX0YefcjrP35FryhievPxZyVWff_NmgJsJVFmmav3VQFTOC1KGIAwfT6QSAHOrGFTCPf2bNLQgVHcn3bupRh61XJ0UD7Ig5oRprUyhR08HSE6BJ5LKmAtdKvIFHhvIepmf4NaNa3ZGwZcEUzGPOnJ3sBAeSW3ohL6mLkoPaQU4J-9"
+        />
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="success-card">
+            <!-- Success Icon -->
+            <div class="success-icon-wrapper">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <h1 class="title">
+                Cadastro Enviado com Sucesso!
+            </h1>
+            <p class="subtitle">
+                Recebemos suas informações e documentos.
+            </p>
+
+            <!-- Status Box -->
+            <div class="status-box">
+                <mat-icon class="status-icon">info</mat-icon>
+                <div class="status-content">
+                    <h3 class="status-title">
+                        Status Atual: 
+                        <span class="status-badge">PENDENTE DE REVISÃO</span>
+                    </h3>
+                    <p class="status-description">
+                        Seu perfil encontra-se na fase de análise técnica. Nossa equipe de administradores revisará a documentação submetida em até <strong>5 dias úteis</strong>, conforme diretriz normativa RN-011. Você será notificado por e-mail assim que o processo for concluído.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="progress-tracker">
+                <div class="progress-line-bg"></div>
+                <div class="progress-line-fill"></div>
+                
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <div class="step-circle">
+                            <mat-icon>check</mat-icon>
+                        </div>
+                        <span class="step-label">Envio</span>
+                    </div>
+                    
+                    <div class="step active">
+                        <div class="step-circle">2</div>
+                        <span class="step-label">Revisão</span>
+                    </div>
+                    
+                    <div class="step pending">
+                        <div class="step-circle">3</div>
+                        <span class="step-label">Aprovação</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTAs -->
+            <div class="actions">
+                <button 
+                    mat-raised-button 
+                    color="primary" 
+                    routerLink="/"
+                    class="primary-btn">
+                    Voltar para a Home
+                </button>
+                
+                <button 
+                    mat-stroked-button 
+                    routerLink="/faq"
+                    class="secondary-btn">
+                    Ler FAQ para Peritos
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-brand">
+            Contrate seu Perito
+        </div>
+        
+        <nav class="footer-nav">
+            <a routerLink="/privacy">Política de Privacidade</a>
+            <a routerLink="/terms">Termos de Serviço</a>
+            <a routerLink="/compliance">Compliance</a>
+            <a routerLink="/contact">Contato</a>
+        </nav>
+        
+        <div class="footer-copy">
+            © 2024 Contrate seu Perito. Todos os direitos reservados.
+        </div>
+    </footer>
+</div>
